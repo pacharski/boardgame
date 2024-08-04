@@ -93,7 +93,7 @@ if __name__ == "__main__":
     print(c3)
  
     paths = [c1, c2, c3]
-    filename = "path.json"
+    filename = "temp/path.json"
     with open(filename, 'w') as jsonfile:
         json.dump(paths, jsonfile, cls=PathEncoder)
     with open(filename, 'r') as jsonfile:

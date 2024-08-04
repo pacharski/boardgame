@@ -178,13 +178,9 @@ class ResizableImage(ResizableCanvas):
 
 if __name__ == "__main__":
     import os
-    #import sys
-    #here = os.path.abspath(__file__)
-    #up_1 = os.path.join( os.path.dirname(here), "..")
-    #sys.path.insert(0, up_1)
-
+    
     here = os.path.abspath(__file__)
-    image_path = os.path.join(os.path.dirname(here), "../images/board_cropped.png")
+    image_path = os.path.join(os.path.dirname(here), "../data/board.png")
  
     root = tkinter.Tk()
     root.title("ResizableImage")

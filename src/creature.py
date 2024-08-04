@@ -1,9 +1,3 @@
-import os
-import sys
-
-import csv
-
-
 class Creature():
     def __init__(self, level, defenses, ability, desc):
         self.level = level
@@ -54,6 +48,9 @@ class Hoard():
 
 
 if __name__ == '__main__':
+    import os
+    import csv
+
     here = os.path.abspath(__file__)
     creatures = os.path.join(os.path.dirname(here), "../data/creatures.csv")
     

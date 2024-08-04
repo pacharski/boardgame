@@ -1,15 +1,7 @@
-import os
-import sys
-here = os.path.abspath(__file__)
-up_1 = os.path.join( os.path.dirname(here), "..")
-sys.path.insert(0, up_1)
-
-import tkinter
 from enum import IntEnum
-
-from dungeon.resizable import ResizableImage
-from dungeon.board import Board
-from dungeon.point import Point
+from resizable import ResizableImage
+from board import Board
+from point import Point
 
 
 class BoardView( ResizableImage ):
@@ -202,6 +194,9 @@ class BoardView( ResizableImage ):
 
 
 if __name__ == "__main__":
+    import os
+    import tkinter
+
     here = os.path.abspath(__file__)
     json_path = os.path.join(os.path.dirname(here), "../data/board.json" )
     board = Board.load_from_json_file(json_path)
@@ -212,7 +207,7 @@ if __name__ == "__main__":
     frame.pack( fill=tkinter.BOTH, expand=tkinter.YES )
     
     # image_name = "dungeon/BoardView_cropped.png"
-    image_path = os.path.join(os.path.dirname(here), "../images/board.png")
+    image_path = os.path.join(os.path.dirname(here), "../data/board.png")
     canvas = BoardView( frame, board, image_path, (400, 300),
                          bg="white", highlightthickness=0 ) 
     

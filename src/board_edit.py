@@ -1,18 +1,11 @@
-import os
-import sys
-here = os.path.abspath(__file__)
-up_1 = os.path.join( os.path.dirname(here), "..")
-sys.path.insert(0, up_1)
-
-import tkinter
 from enum import IntEnum
 
-from dungeon.board_view import BoardView
-from dungeon.board import Board
-from dungeon.point import Point
-from dungeon.space import Space
-from dungeon.path import Path
-from dungeon.exit import Exit
+from board_view import BoardView
+from board import Board
+from point import Point
+from space import Space
+from path import Path
+from exit import Exit
 
 
 class BoardEdit( BoardView ):
@@ -295,17 +288,18 @@ class BoardEdit( BoardView ):
 
 
 if __name__ == "__main__":
-    # self, parent, board, image_path, size, **kwargs
+    import os
+    import tkinter
+    
     here = os.path.abspath(__file__)
-    image_path = os.path.join(os.path.dirname(here), "../images/board.png")
+    image_path = os.path.join(os.path.dirname(here), "../data/board.png")
     json_path = os.path.join(os.path.dirname(here), "../data/board.json" )
  
     root = tkinter.Tk()
-    root.title( "viewing" )
+    root.title( "cReadOnly" )
     frame = tkinter.Frame( root )
     frame.pack( fill=tkinter.BOTH, expand=tkinter.YES )
     
-    # image_name = "dungeon/board_cropped.png"
     canvas = BoardEdit( frame, json_path, image_path, (400, 300),
                         bg="white", highlightthickness=0 ) 
         

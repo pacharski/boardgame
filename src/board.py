@@ -1,17 +1,12 @@
 import os
-import sys
-here = os.path.abspath(__file__)
-up_1 = os.path.join( os.path.dirname(here), "..")
-sys.path.insert(0, up_1)
-
 import json
 from collections import OrderedDict
 
-from dungeon.json_encoder import CompactJSONEncoder
-from dungeon.point import Point
-from dungeon.space import Space
-from dungeon.path import Path
-from dungeon.exit import Exit
+from json_encoder import CompactJSONEncoder
+from point import Point
+from space import Space
+from path import Path
+from exit import Exit
 
 
 class Board():
@@ -112,8 +107,8 @@ if __name__ == "__main__":
     json_path = os.path.join(os.path.dirname(here), "../data/board.json" )
 
     board = Board.load_from_json_file(json_path, name="TestBoard")
-    board.save_to_json_file(json_path="board.json")
-    board = Board.load_from_json_file(json_path="board.json")
+    board.save_to_json_file(json_path="temp/board.json")
+    board = Board.load_from_json_file(json_path="temp/board.json")
 
     print("Board", board.name, len(board.spaces))
     assert(board.name == "TestBoard")

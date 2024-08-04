@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
     spaces = [s1, s2, s3, s4, s5]
     
-    filename = "space.json"
+    filename = "temp/space.json"
     with open(filename, 'w') as jsonfile:
         json.dump(spaces, jsonfile, cls=SpaceEncoder)
     with open(filename, 'r') as jsonfile:

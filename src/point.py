@@ -54,7 +54,7 @@ if __name__ == "__main__":
     print(p5)
     print()
 
-    filename = "point.json"
+    filename = "temp/point.json"
     with open(filename, 'w') as jsonfile:
         json.dump(points, jsonfile, cls=PointEncoder)
     with open(filename, 'r') as jsonfile:

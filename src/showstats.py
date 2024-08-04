@@ -1,3 +1,5 @@
+# for profiling with prof/re
+
 import pstats
 from pstats import SortKey
 p = pstats.Stats('prof.out')

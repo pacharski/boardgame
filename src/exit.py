@@ -1,5 +1,3 @@
-
-
 class Exit():
     cBarriers = ["", "Door", "Secret Door"]
     
@@ -94,7 +92,7 @@ if __name__ == "__main__":
     print(ExitPP(e4, name_width))
     print()
  
-    filename = "exit.json"
+    filename = "temp/exit.json"
     with open(filename, 'w') as jsonfile:
         json.dump(exits, jsonfile, cls=Encoder)
     with open(filename, 'r') as jsonfile:
