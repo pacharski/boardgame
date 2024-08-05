@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 class Exit():
     cBarriers = ["", "Door", "Secret Door"]
     
@@ -14,9 +16,8 @@ class Exit():
         self.open = set() # per player
 
     def deep_copy(self):
-        open = set(self.open)
-        return Exit(self.name, self.destination, self.barrier, open=open)
-
+        return deepcopy(self)
+        
     def __str__(self):
         barrier_width = max([len(b) for b in Exit.cBarriers])
         form = "Exit {}:  {: <{}} --> {}"
@@ -82,6 +83,7 @@ if __name__ == "__main__":
     e3.destination = 34
 
     e4 = e3.deep_copy()
+    e4.destination = 45
 
     exits = [e1, e2, e3, e4]
     

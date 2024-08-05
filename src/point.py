@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 class Point():
     def __init__(self, x=0, y=0):
         self.x = x
@@ -8,7 +10,7 @@ class Point():
         return (self.x, self.y)
     
     def deep_copy(self):
-        return Point(self.x, self.y)
+        return deepcopy(self)
     
     def __str__(self):
         form = "Point: ({x}, {y})"
@@ -44,6 +46,7 @@ if __name__ == "__main__":
     p3 = Point(y=4)
     p4 = Point(x=6, y=8)
     p5 = p4.deep_copy()
+    p5.y = 12
 
     points = [p1, p2, p3, p4, p5]
     

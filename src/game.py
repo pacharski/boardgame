@@ -11,7 +11,7 @@ from exit import Exit
 
 class Game():
     def __init__(self, name=None, board=None, players={},
-                 tokens={}, cards={}):
+                 npcs={}, cards={}):
         self.name = name if name != None else ""
         self.board = board
         self.last_space_id = None

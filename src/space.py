@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from point import Point
 
 
@@ -27,10 +29,7 @@ class Space():
         self.vertices = self.vertices[:-1]
 
     def deep_copy(self):
-        vertices = [point.deep_copy() for point in self.vertices]
-        exits = [e.deep_copy() for e in self.exits]
-        return Space(name=self.name, level=self.level, center=self.center,
-                     vertices=vertices, exits=exits)
+        return deepcopy(self)
 
     @property
     def num_vertices(self):
