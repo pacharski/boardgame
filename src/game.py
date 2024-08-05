@@ -1,65 +1,52 @@
-import os
-import json
-from collections import OrderedDict
-
 from json_encoder import CompactJSONEncoder
-from point import Point
-from space import Space
-from path import Path
-from exit import Exit
+from board import Board
+from player import Player
+from card import Card, Deck
 
 
 class Game():
     def __init__(self, name=None, board=None, players={},
-                 npcs={}, cards={}):
+                 npcs={}, decks={}):
         self.name = name if name != None else ""
         self.board = board
-        self.last_space_id = None
-        
-    def find_space(self, point):
-        x, y = point.xy
-        min_dist, closest_id, closest_space = None, None, None
-        for id, space in self.spaces.items():
-            cx, cy = space.center.xy
-            dist = ((x - cx) ** 2) + ((y - cy) ** 2)
-            if (min_dist == None) or (dist < min_dist):
-                min_dist = dist
-                closest_id, closest_space = id, space
-        return closest_id, closest_space
-                
-    def add_space(self, space, copy=False):
-        space_id = (self.last_space_id + 1 if (self.last_space_id != None) else
-                    max(self.spaces.keys()) + 1)
-        self.spaces[space_id] = space.deep_copy() if copy else space
-        self.spaces[space_id].id = space_id
-        self.last_space_id = space_id
+        self.players = players
+        self.npcs = npcs
+        self.decks = decks
 
     def __str__(self):
-        form = "Board: {} Spaces={}"
-        return form.format(self.name, len(self.spaces))
+        form = "Game: {} Players=() Npcs={} Decks={}"
+        return form.format(self.name, len(self.players), len(self.npcs), len(self.cards))
         
     def json_encode(self):
-        sorted_keys = sorted([int(k) for k in self.spaces.keys()])
-        sorted_spaces = OrderedDict()
-        for k in sorted_keys:
-            sorted_spaces[k] = self.spaces[k]
-        return {"name": self.name,
-                "spaces": sorted_spaces
-               } 
+        # sorted_keys = sorted([int(k) for k in self.spaces.keys()])
+        # sorted_spaces = OrderedDict()
+        # for k in sorted_keys:
+        #     sorted_spaces[k] = self.spaces[k]
+        # return {"name": self.name,
+        #         "spaces": sorted_spaces
+        #        } 
+        pass
     
     # Note: this is a class function
     def json_decode(json_dict):
-        if "Board" in json_dict:
-            name   = json_dict["Board"]["name"]
-            spaces = json_dict["Board"]["spaces"]
-            return Board(name=name,
-                         spaces=spaces
-                        )
+        # if "Game" in json_dict:
+        #     name   = json_dict["Game"]["name"]
+        #     board  = json_dict["Game"]["board"]    
+        #     spaces = json_dict["Game"]["players"]
+        #     npcs   = json_dict["Game"]["npcs"]
+        #     decks  = json_dict["Game"]["decks"]
+        #     return Game(name=name,
+        #                 board=board,
+        #                 players=players,
+        #                 npcs=npcs,
+        #                 decks=decks
+        #                )
+        pass
         
     def save_to_json_file(self, json_path=None):
         class LocalJSONEncoder(CompactJSONEncoder):
             def default(self, o):
-                if isinstance(o, (Board, Space, Point, Path, Exit)):  
+                if isinstance(o, (Game, Board, Space, Point, Path, Exit, Player, Token, Deck, Card)):  
                     return o.json_encode()
                 return CompactJSONEncoder.default(self, o)
         
@@ -86,35 +73,41 @@ class Game():
                     return Path.json_decode(dct)
                 if 'Exit' in dct:
                     return Exit.json_decode(dct)
+                if 'Player' in dct:
+                    return Exit.json_decode(dct)
+                if 'Token' in dct:
+                    return Exit.json_decode(dct)
+                if 'Deck' in dct:
+                    return Exit.json_decode(dct)
+                if 'Card' in dct:
+                    return Exit.json_decode(dct)
                 return dct
             
         try:
             with open(json_path, 'r') as json_file:
                 json_data = json.load(json_file, cls=LocalJSONDecoder)
-            board = Board()
-            board.name = json_data.get("name", "") if name == None else name
-            board.spaces = {int(k): v for k, v in json_data.get("spaces", {}).items()}
-            for k, v in board.spaces.items():
-                if v.id < 0:
-                    v.id = int(k)
-            return board
+            game = Game()
+            game.name = json_data.get("name", "") if name == None else name
+            game.board = json_data.get("board", None)
+            game.players = json_data.get("players", {})
+            game.npcs = json_data.get("npcs", {})
+            game.decks = json_data.get("decks", {})
+            return game
         except Exception as e:
+            # print exception to help with debugging bad json
             print("Exception", e)
             pass
 
 
 if __name__ == "__main__":
+    import os
+    
     here = os.path.abspath(__file__)
     json_path = os.path.join(os.path.dirname(here), "../data/board.json" )
 
-    board = Board.load_from_json_file(json_path, name="TestBoard")
-    board.save_to_json_file(json_path="temp/board.json")
-    board = Board.load_from_json_file(json_path="temp/board.json")
+    board = Board.load_from_json_file(json_path, name="GameBoard")
+    game = Game("A Game", board=board)
 
-    print("Board", board.name, len(board.spaces))
-    assert(board.name == "TestBoard")
-    assert(len(board.spaces) == 419)
-    print("Find(100,100)", board.find_space(Point(100, 100)))
-    assert(board.find_space(Point(100, 100))[0] == 333)
-    print("Find(200,100)", board.find_space(Point(200, 100)))
-    assert(board.find_space(Point(200, 100))[0] == 329)
+    print("Game", game.name, game.board)
+    assert(game.name == "A Game")
+    
