@@ -18,43 +18,44 @@ class Token():
                            self.image_path)
     
     def json_encode(self):
-        return {"name": self.name,
-                "color": self.color,
-                "shape": self.shape,
-                "size": self.size,
-                "image_path": self.image_path}
+        return {"Token": {"name": self.name,
+                          "color": self.color,
+                          "shape": self.shape,
+                          "size": self.size,
+                          "image_path": self.image_path}}
     
     # Note: this is a class function
     def json_decode(json_dict):
-        if "Player" in json_dict:
-            name       = json_dict["Player"]["name"]
-            color      = json_dict["Player"]["color"]
-            shape      = json_dict["Player"]["shape"]
-            size       = json_dict["Player"]["size"]
-            image_path = json_dict["Player"]["image_path"]
-            return Player(name=name,
-                          color=color,
-                          shape=shape,
-                          size=int(size),
-                          image_path=image_path
-                         )
+        if "Token" in json_dict:
+            name       = json_dict["Token"]["name"]
+            color      = json_dict["Token"]["color"]
+            shape      = json_dict["Token"]["shape"]
+            size       = json_dict["Token"]["size"]
+            image_path = json_dict["Token"]["image_path"]
+            return Token(name=name,
+                         color=color,
+                         shape=shape,
+                         size=int(size) if size != None else size,
+                         image_path=image_path
+                        )
         
 
 if __name__ == '__main__':
     import os
     import json
+    from json_encoder import CompactJSONEncoder
 
-    class LocalEncoder(json.JSONEncoder):
+    class LocalEncoder(CompactJSONEncoder):
         def default(self, o):
             if isinstance(o, Token):
                 return o.json_encode()
-            return json.JSONEncoder.default(self, o)
+            return CompactJSONEncoder.default(self, o)
     
     class LocalDecoder(json.JSONDecoder):
         def __init__(self, *args, **kwargs):
             json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
         def object_hook(self, dct):
-            if 'Token' in dct:
+            if "Token" in dct:
                 return Token.json_decode(dct)
             return dct
         
@@ -75,3 +76,4 @@ if __name__ == '__main__':
         tokens_copy = json.load(jsonfile, cls=LocalDecoder)
 
     assert len(tokens) == len(tokens_copy)
+    assert tokens[0].name == tokens_copy[0].name
