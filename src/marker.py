@@ -1,4 +1,4 @@
-class Token():
+class Marker():
     cShapes = ["circle", "triangle", "square", "pentagon", "hexagon",
                "star"]
     
@@ -12,13 +12,13 @@ class Token():
         self.image = image
         
     def __str__(self):
-        form = "Token: {} Shape={}-{}-{} Image={}"
+        form = "Marker: {} Shape={}-{}-{} Image={}"
         return form.format(self.name, self.color, self.shape, 
                            "auto" if self.size == None else self.size,
                            self.image_path)
     
     def json_encode(self):
-        return {"Token": {"name": self.name,
+        return {"Marker": {"name": self.name,
                           "color": self.color,
                           "shape": self.shape,
                           "size": self.size,
@@ -26,13 +26,13 @@ class Token():
     
     # Note: this is a class function
     def json_decode(json_dict):
-        if "Token" in json_dict:
-            name       = json_dict["Token"]["name"]
-            color      = json_dict["Token"]["color"]
-            shape      = json_dict["Token"]["shape"]
-            size       = json_dict["Token"]["size"]
-            image_path = json_dict["Token"]["image_path"]
-            return Token(name=name,
+        if "Marker" in json_dict:
+            name       = json_dict["Marker"]["name"]
+            color      = json_dict["Marker"]["color"]
+            shape      = json_dict["Marker"]["shape"]
+            size       = json_dict["Marker"]["size"]
+            image_path = json_dict["Marker"]["image_path"]
+            return Marker(name=name,
                          color=color,
                          shape=shape,
                          size=int(size) if size != None else size,
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     class LocalEncoder(CompactJSONEncoder):
         def default(self, o):
-            if isinstance(o, Token):
+            if isinstance(o, Marker):
                 return o.json_encode()
             return CompactJSONEncoder.default(self, o)
     
@@ -55,25 +55,25 @@ if __name__ == '__main__':
         def __init__(self, *args, **kwargs):
             json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
         def object_hook(self, dct):
-            if "Token" in dct:
-                return Token.json_decode(dct)
+            if "Marker" in dct:
+                return Marker.json_decode(dct)
             return dct
         
-    t1 = Token("G-er", "green", "square") 
-    t2 = Token("B-er", "blue", "circle") 
-    t3 = Token("R-er", "red", "triangle")  
-    t4 = Token("R-er", "red", "triangle")   
-    t5 = Token("W-er", "white", "star")
+    t1 = Marker("G-er", "green", "square") 
+    t2 = Marker("B-er", "blue",  "circle") 
+    t3 = Marker("R-er", "red",   "triangle")  
+    t4 = Marker("R-er", "red",   "triangle")   
+    t5 = Marker("W-er", "white", "star")
 
-    tokens = [t1, t2, t3, t4, t5]
-    for token in tokens:
-        print(token)
+    markers = [t1, t2, t3, t4, t5]
+    for marker in markers:
+        print(marker)
 
-    filename = "temp/token.json"
+    filename = "temp/marker.json"
     with open(filename, 'w') as jsonfile:
-        json.dump(tokens, jsonfile, cls=LocalEncoder)
+        json.dump(markers, jsonfile, cls=LocalEncoder)
     with open(filename, 'r') as jsonfile:
-        tokens_copy = json.load(jsonfile, cls=LocalDecoder)
+        markers_copy = json.load(jsonfile, cls=LocalDecoder)
 
-    assert len(tokens) == len(tokens_copy)
-    assert tokens[0].name == tokens_copy[0].name
+    assert len(markers) == len(markers_copy)
+    assert markers[0].name == markers_copy[0].name
