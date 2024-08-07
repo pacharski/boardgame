@@ -16,7 +16,7 @@ class Creature():
                       str( self.defenses[5] ).ljust(2))
     
 
-class Hoard():
+class Bestiary():
     def __init__(self, filename):
         self.creatures = []
         with open(filename, newline='') as csvfile:
@@ -54,5 +54,5 @@ if __name__ == '__main__':
     here = os.path.abspath(__file__)
     creatures = os.path.join(os.path.dirname(here), "../data/creatures.csv")
     
-    hoard = Hoard(creatures)
-    hoard.show()
+    bestiary = Bestiary(creatures)
+    bestiary.show()

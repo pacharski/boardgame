@@ -53,7 +53,6 @@ class Deck():
 
         
 if __name__ == '__main__':
-    import os
     import json
     from json_encoder import CompactJSONEncoder
 

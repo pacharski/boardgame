@@ -1,12 +1,17 @@
+from card import Card, Deck
+
 class Layout():
     """"Define the size and location of components of a card style and value"""
-    def __init__(self, name, blocking={}):
+    def __init__(self, name="", blocking=[]):
         self.name = name
-        self.properties = blocking
+        self.blocking = blocking
 
     def __str__(self):
         form = "Layout: {} blocking={}"
-        return form.format(self.name, self.blocking.keys())
+        return form.format(self.name, len(self.blocking))
+    
+    def __len__(self):
+        return len(self.blocking)
 
     def json_encode(self):
         return {"Layout": {"name":       self.name,
@@ -22,42 +27,29 @@ class Layout():
 
 class Style():
     """Define the colors and layout of a card face or back"""
-    def __init__(self, name, components={}, blocking={})
+    def __init__(self, name="", components={}, layout=[]):
         self.name         = name
         self.components   = components
-        self.blocking     = blocking
+        self.layout       = layout
 
     def __str__(self):
-        form = "Style {}: {}/{}/{}"
+        form = "Style: {} Components={} Layout={}"
         return form.format(self.name, 
-                           self.color, self.image_path, self.text) 
+                           len(self.components), len(self.layout)) 
     
     def json_encode(self):
         return {"Style": {"name":          self.name,
-                          "color":         self.color,
-                          "image_path":    self.image_path,
-                          "border_width":  self.border_width,
-                          "border_color":  self.border_color,
-                          "text":          self.text,
-                          "text_color":    self.text_color
-                         } 
-               }
+                          "components":    self.components,
+                          "layout":        self.layout}}
     
     # Note: this is a class function
     def json_decode(json_dict):
         if "Style" in json_dict:
             name         = json_dict["Style"]["name"]
-            color        = json_dict["Style"]["color"]
-            image_path   = json_dict["Style"]["image_path"]
-            image        = None
-            border_width = json_dict["Style"]["border_width"]
-            border_color = json_dict["Style"]["border_color"]
-            text         = json_dict["Style"]["text"]
-            text_color   = json_dict["Style"]["text_color"]
-            return Style(name, color=color, image_path=image_path, image=image,
-                        border_width=int(border_width), border_color=border_color,
-                        text=text, text_color=text_color)
-
+            components   = json_dict["Style"]["components"]
+            layout       = json_dict["Style"]["layout"]
+            return Style(name, components=components, layout=layout)
+            
     
 class CardView():
     """Display a card on tkinter canvas"""
@@ -70,6 +62,19 @@ class CardView():
         form = "CardView: {} Front={} Back={}"
         return form.format(self.card, self.front, self.back)
     
+    def json_encode(self):
+        return {"CardView": {"card":     self.card,
+                             "front":    self.front,
+                             "back":     self.back}}
+    
+    # Note: this is a class function
+    def json_decode(json_dict):
+        if "CardView" in json_dict:
+            card         = json_dict["CardView"]["card"]
+            front        = json_dict["CardView"]["front"]
+            back         = json_dict["CardView"]["back"]
+            return CardView(card, front=front, back=back)
+   
     
 class DeckView():
     def __init__(self, name, cards=[]):
@@ -96,7 +101,7 @@ if __name__ == '__main__':
 
     class LocalEncoder(CompactJSONEncoder):
         def default(self, o):
-            if isinstance(o, (Deck, Card)):
+            if isinstance(o, (Style, Layout, CardView, Deck, Card)):
                 return o.json_encode()
             return CompactJSONEncoder.default(self, o)
     
@@ -104,21 +109,27 @@ if __name__ == '__main__':
         def __init__(self, *args, **kwargs):
             json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
         def object_hook(self, dct):
+            if "Style" in dct:
+                return Deck.json_decode(dct)
+            if "Layout" in dct:
+                return Deck.json_decode(dct)
+            if "CardView" in dct:
+                return Deck.json_decode(dct)
             if "Deck" in dct:
                 return Deck.json_decode(dct)
             if "Card" in dct:
                 return Card.json_decode(dct)
             return dct
 
-    front = Style("Spell Front", color="white", text_color="black")
-    back = Style("Spell Back", color="black", text_color="white", text="Spell")
+    front = Style("Spell Front", components={}, layout=Layout("front_layout"))
+    back = Style("Spell Back", components={})
     print(front)
     print(back)
     print()
     
-    card1 = Card("Zap",   text="Zap",   front=front, back=back)
-    card2 = Card("Zop",   text="Zop",   front=front, back=back)
-    card3 = Card("Phase", text="Phase", front=front, back=back)
+    card1 = Card("Zap",   "Zap")
+    card2 = Card("Zop",   "Zop")
+    card3 = Card("Phase", "Phase")
     print(card1)
     print(card2)
     print(card3)
@@ -126,8 +137,31 @@ if __name__ == '__main__':
 
     deck = Deck("Spell Cards", cards=[*(card1 * 9), *(card2 * 9), *(card3 * 6)])
     print("Deck", deck)
-    for card in deck:
-        print(card)
+
+    card_views = [CardView(card, front=front, back=back) for card in deck]
+    for card_view in card_views:
+        print(card_view)
     print()
 
-    
+    filename = "temp/style.json"
+    styles = {"front": front,
+              "back":  back}
+    with open(filename, 'w') as jsonfile:
+        json.dump(styles, jsonfile, cls=LocalEncoder)
+    with open(filename, 'r') as jsonfile:
+        styles_copy = json.load(jsonfile, cls=LocalDecoder)
+
+    assert len(styles) == len(styles_copy)
+    assert "front" in styles_copy
+    assert "back" in styles_copy
+ 
+    filename = "temp/card_view.json"
+    with open(filename, 'w') as jsonfile:
+        json.dump(card_views, jsonfile, cls=LocalEncoder)
+    with open(filename, 'r') as jsonfile:
+        card_views_copy = json.load(jsonfile, cls=LocalDecoder)
+
+    assert len(card_views) == len(card_views_copy)
+    #assert "front" in styles_copy
+    #assert "back" in styles_copy
+ 

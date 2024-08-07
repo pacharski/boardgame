@@ -1,22 +1,22 @@
-from token import Token
+from marker import Marker
 
 class Player():
-    def __init__(self, name, token, decks={}, location=None, id=None):
+    def __init__(self, name, marker, decks={}, location=None, id=None):
         self.name = name
         self.id = id
-        self.token = token
+        self.marker = marker
         self.decks = decks
         self.location = location
         
     def __str__(self):
-        form = "Player {}: {} Token={} Decks={} at {}"
+        form = "Player {}: {} Marker={} Decks={} at {}"
         return form.format("P" + str(self.id) if self.id != None else "NPC",
-                           self.name, self.token, len(self.decks), self.location)
+                           self.name, self.marker, len(self.decks), self.location)
     
     def json_encode(self):
         return {"Player": {"name": self.name,
                            "id": self.id,
-                           "token": self.token.json_encode(),
+                           "marker": self.marker.json_encode(),
                            "decks": self.decks,
                            "location": self.location}}
     
@@ -25,12 +25,12 @@ class Player():
         if "Player" in json_dict:
             name      = json_dict["Player"]["name"]
             id        = json_dict["Player"]["id"]
-            token     = json_dict["Player"]["token"]
+            marker    = json_dict["Player"]["marker"]
             decks     = json_dict["Player"]["decks"]
             location  = json_dict["Player"]["location"]
             return Player(name=name,
                           id=id,
-                          token=token,
+                          marker=marker,
                           decks=decks,
                           location=location
                          )
@@ -40,11 +40,11 @@ if __name__ == '__main__':
     import os
     import json
     from json_encoder import CompactJSONEncoder
-    from card import Style, Card, Deck
+    from card import Card, Deck
 
     class LocalEncoder(json.JSONEncoder):
         def default(self, o):
-            if isinstance(o, (Style, Card, Deck, Token, Player)):
+            if isinstance(o, (Card, Deck, Marker, Player)):
                 return o.json_encode()
             return json.JSONEncoder.default(self, o)
     
@@ -52,21 +52,19 @@ if __name__ == '__main__':
         def __init__(self, *args, **kwargs):
             json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
         def object_hook(self, dct):
-            if "Style" in dct:
-                return Style.json_decode(dct)
             if "Card" in dct:
                 return Card.json_decode(dct)
             if "Deck" in dct:
                 return Deck.json_decode(dct)
-            if "Token" in dct:
-                return Token.json_decode(dct)
+            if "Marker" in dct:
+                return Marker.json_decode(dct)
             if "Player" in dct:
                 return Player.json_decode(dct)
             return dct
         
-    card1 = Card("Zap",   text="Zap")   
-    card2 = Card("Zop",   text="Zop")   
-    card3 = Card("Phase", text="Phase") 
+    card1 = Card("Zap",   "Zap")   
+    card2 = Card("Zop",   "Zop")   
+    card3 = Card("Phase", "Phase") 
     print(card1)
     print(card2)
     print(card3)
@@ -79,12 +77,12 @@ if __name__ == '__main__':
         print(card)
     print()
 
-    p1   = Player("Fred",    token=Token("", "green"), location=0,    id=1)
-    p2   = Player("Daphne",  token=Token("", "blue" ), location=23,   id=2)
-    p3   = Player("Velma",   token=Token("", "red"  ), location=100,  id=3)
-    p4   = Player("Scooby",  token=Token("", "red"  ), location=212,  id=4)
-    p5   = Player("Shaggy",  token=Token("", "white"), location=256,  id=5)
-    npc1 = Player("Old Man", token=Token("", "black", "star"), location=12, decks={"deck1": deck1, "deck2": deck2})
+    p1   = Player("Fred",    marker=Marker("", "green"), location=0,    id=1)
+    p2   = Player("Daphne",  marker=Marker("", "blue" ), location=23,   id=2)
+    p3   = Player("Velma",   marker=Marker("", "red"  ), location=100,  id=3)
+    p4   = Player("Scooby",  marker=Marker("", "red"  ), location=212,  id=4)
+    p5   = Player("Shaggy",  marker=Marker("", "white"), location=256,  id=5)
+    npc1 = Player("Old Man", marker=Marker("", "black", "star"), location=12, decks={"deck1": deck1, "deck2": deck2})
 
     players = [p1, p2, p3, p4, p5, npc1]
     for player in players:

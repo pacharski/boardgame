@@ -5,7 +5,7 @@ from point import Point
 from path import Path
 from exit import Exit
 from player import Player
-from token import Token
+from marker import Marker
 from card import Card, Deck
 
 
@@ -17,6 +17,8 @@ class Game():
         self.players = players
         self.npcs = npcs
         self.decks = decks
+        self.hoard = None
+        self.bestiary = None
 
     def __str__(self):
         form = "Game: {} Players={} Npcs={} Decks={}"
@@ -48,7 +50,7 @@ class Game():
     def save_to_json_file(self, json_path=None):
         class LocalJSONEncoder(CompactJSONEncoder):
             def default(self, o):
-                if isinstance(o, (Game, Board, Space, Point, Path, Exit, Player, Token, Deck, Card)):  
+                if isinstance(o, (Game, Board, Space, Point, Path, Exit, Player, Marker, Deck, Card)):  
                     return o.json_encode()
                 return CompactJSONEncoder.default(self, o)
         
@@ -76,13 +78,13 @@ class Game():
                 if 'Exit' in dct:
                     return Exit.json_decode(dct)
                 if 'Player' in dct:
-                    return Exit.json_decode(dct)
-                if 'Token' in dct:
-                    return Exit.json_decode(dct)
+                    return Player.json_decode(dct)
+                if 'Marker' in dct:
+                    return Marker.json_decode(dct)
                 if 'Deck' in dct:
-                    return Exit.json_decode(dct)
+                    return Deck.json_decode(dct)
                 if 'Card' in dct:
-                    return Exit.json_decode(dct)
+                    return Card.json_decode(dct)
                 return dct
             
         try:
@@ -111,15 +113,15 @@ if __name__ == "__main__":
     json_path = os.path.join(os.path.dirname(here), "../data/board.json" )
     board = Board.load_from_json_file(json_path, name="GameBoard")
 
-    p1   = Player("Fred",    token=Token("", "green"), location=0,    id=1)
-    p2   = Player("Daphne",  token=Token("", "blue" ), location=23,   id=2)
-    p3   = Player("Velma",   token=Token("", "red"  ), location=100,  id=3)
-    p4   = Player("Scooby",  token=Token("", "red"  ), location=212,  id=4)
-    p5   = Player("Shaggy",  token=Token("", "white"), location=256,  id=5)
+    p1   = Player("Fred",    marker=Marker("", "green"), location=0,    id=1)
+    p2   = Player("Daphne",  marker=Marker("", "blue" ), location=23,   id=2)
+    p3   = Player("Velma",   marker=Marker("", "red"  ), location=100,  id=3)
+    p4   = Player("Scooby",  marker=Marker("", "red"  ), location=212,  id=4)
+    p5   = Player("Shaggy",  marker=Marker("", "white"), location=256,  id=5)
     players = {p.name: p for p in [p1, p2, p3, p4, p5]}
 
-    npc1 = Player("Old Man",  token=Token("", "black", "star"), location=12)
-    npc2 = Player("Henchman", token=Token("", "bluw", "star"),  location=13)
+    npc1 = Player("Old Man",  marker=Marker("", "black", "star"), location=12)
+    npc2 = Player("Henchman", marker=Marker("", "bluw", "star"),  location=13)
     npcs = {p.name: p for p in [npc1, npc2]}
         
     card1 = Card("Zap",   front_text="Zap",   back_text="Spell")
