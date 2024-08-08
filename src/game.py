@@ -7,50 +7,75 @@ from exit import Exit
 from player import Player
 from marker import Marker
 from card import Card, Deck
+from hoard import Hoard, Treasure
+from horde import Horde, Creature
+
 
 
 class Game():
-    def __init__(self, name=None, board=None, players={},
-                 npcs={}, decks={}):
-        self.name = name if name != None else ""
-        self.board = board
-        self.players = players
-        self.npcs = npcs
-        self.decks = decks
-        self.hoard = None
-        self.bestiary = None
+    def __init__(self):
+        self.board = self.create_board()
+        self.hoard = self.create_hoard()
+        self.horde = self.create_horde()
+        self.players = self.create_players()
 
+    def create_board(self):
+        here = os.path.abspath(__file__)
+        json_path = os.path.join(os.path.dirname(here), "../data/board.json" )
+        return Board.load_from_json_file(json_path)
+    
+    def create_hoard(self):
+        here = os.path.abspath(__file__)
+        csv_path = os.path.join(os.path.dirname(here), "../data/treasures.csv" )
+        return Hoard.from_csv_file(csv_path)
+    
+    def create_horde(self):
+        here = os.path.abspath(__file__)
+        csv_path = os.path.join(os.path.dirname(here), "../data/creatures.csv" )
+        return Horde.from_csv_file(csv_path)
+    
+    def create_players(self):
+        p1   = Player("Elf 1",         marker=Marker("", "green"), location=0, id=1)
+        p2   = Player("Elf 1",         marker=Marker("", "green"), location=0, id=2)
+        p3   = Player("Hero 2",        marker=Marker("", "blue" ), location=0, id=3)
+        p4   = Player("Hero 2",        marker=Marker("", "blue" ), location=0, id=4)
+        p5   = Player("Super Hero 1",  marker=Marker("", "red"  ), location=0, id=5)
+        p6   = Player("Super Hero 2",  marker=Marker("", "red"  ), location=0, id=6)
+        p7   = Player("Wizard 1",      marker=Marker("", "white"), location=0, id=7)
+        p8   = Player("Wizard 1",      marker=Marker("", "white"), location=0, id=8)
+        return {p.name: p for p in [p1, p2, p3, p4, p5, p6, p7, p8]}
+        
     def __str__(self):
-        form = "Game: {} Players={} Npcs={} Decks={}"
-        return form.format(self.name, len(self.players), len(self.npcs), len(self.decks))
+        form = "Game: Players={} Creatures={} Treasures={}"
+        return form.format(len(self.players), len(self.horde), len(self.hoard))
         
     def json_encode(self):
-        return {"name": self.name,
-                "board": board.json_encode(),
-                "players": self.players,
-                "npcs": self.npcs,
-                "decks": self.decks}
+        return {"Game": {"board": self.board,
+                         "players": self.players,
+                         "horde": self.horde,
+                         "hoard": self.hoard}}
         
     # Note: this is a class function
     def json_decode(json_dict):
-        # if "Game" in json_dict:
-        #     name   = json_dict["Game"]["name"]
-        #     board  = json_dict["Game"]["board"]    
-        #     spaces = json_dict["Game"]["players"]
-        #     npcs   = json_dict["Game"]["npcs"]
-        #     decks  = json_dict["Game"]["decks"]
-        #     return Game(name=name,
-        #                 board=board,
-        #                 players=players,
-        #                 npcs=npcs,
-        #                 decks=decks
-        #                )
-        pass
+        if "Game" in json_dict:
+            board   = Board.json_decode(json_dict["Dungeon"]["board"])
+            players = json_dict["Dungeon"]["players"]    
+            horde   = Horde.json_decode(json_dict["Dungeon"]["horde"])
+            hoard   = Hoard.json_decode(json_dict["Dungeon"]["hoard"])
+            game = Game()
+            game.board = board
+            game.players = players
+            game.horde = horde
+            game.hoard = hoard
+            return game
         
     def save_to_json_file(self, json_path=None):
         class LocalJSONEncoder(CompactJSONEncoder):
             def default(self, o):
-                if isinstance(o, (Game, Board, Space, Point, Path, Exit, Player, Marker, Deck, Card)):  
+                if isinstance(o, (Game, Board, Space, Point, Path, Exit, 
+                                  Player, Marker, Deck, Card,
+                                  Hoard, Treasure,
+                                  Horde, Creature)):  
                     return o.json_encode()
                 return CompactJSONEncoder.default(self, o)
         
@@ -67,6 +92,8 @@ class Game():
             def __init__(self, *args, **kwargs):
                 json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
             def object_hook(self, dct):
+                if 'Game' in dct:
+                    return Game.json_decode(dct)
                 if 'Board' in dct:
                     return Board.json_decode(dct)
                 if 'Point' in dct:
@@ -85,17 +112,20 @@ class Game():
                     return Deck.json_decode(dct)
                 if 'Card' in dct:
                     return Card.json_decode(dct)
+                if 'Hoard' in dct:
+                    return Hoard.json_decode(dct)
+                if 'Treasure' in dct:
+                    return Treasure.json_decode(dct)
+                if 'Horde' in dct:
+                    return Horde.json_decode(dct)
+                if 'Creature' in dct:
+                    return Creature.json_decode(dct)
                 return dct
             
         try:
             with open(json_path, 'r') as json_file:
                 json_data = json.load(json_file, cls=LocalJSONDecoder)
-            game = Game()
-            game.name = json_data.get("name", "") if name == None else name
-            game.board = json_data.get("board", None)
-            game.players = json_data.get("players", {})
-            game.npcs = json_data.get("npcs", {})
-            game.decks = json_data.get("decks", {})
+            game = json_data["Game"]
             return game
         except Exception as e:
             # print exception to help with debugging bad json
@@ -107,40 +137,14 @@ if __name__ == "__main__":
     import os
     import json 
 
-    name = "A Game"
+    game = Game()
     
     here = os.path.abspath(__file__)
-    json_path = os.path.join(os.path.dirname(here), "../data/board.json" )
-    board = Board.load_from_json_file(json_path, name="GameBoard")
-
-    p1   = Player("Fred",    marker=Marker("", "green"), location=0,    id=1)
-    p2   = Player("Daphne",  marker=Marker("", "blue" ), location=23,   id=2)
-    p3   = Player("Velma",   marker=Marker("", "red"  ), location=100,  id=3)
-    p4   = Player("Scooby",  marker=Marker("", "red"  ), location=212,  id=4)
-    p5   = Player("Shaggy",  marker=Marker("", "white"), location=256,  id=5)
-    players = {p.name: p for p in [p1, p2, p3, p4, p5]}
-
-    npc1 = Player("Old Man",  marker=Marker("", "black", "star"), location=12)
-    npc2 = Player("Henchman", marker=Marker("", "bluw", "star"),  location=13)
-    npcs = {p.name: p for p in [npc1, npc2]}
-        
-    card1 = Card("Zap",   front_text="Zap",   back_text="Spell")
-    card2 = Card("Zop",   front_text="Zop",   back_text="Spell")
-    card3 = Card("Phase", front_text="Phase", back_text="Spell")
-    deck1 = Deck("Spell Cards", cards=[*(card1 * 9), *(card2 * 9), *(card3 * 6)])
-    
-    treasure_cards = [Card(str(value)+"gp" for value in range(100, 2500, 100))]
-    deck2 = Deck("Treasure Cards", cards=treasure_cards)
-    decks = {d.name: d for d in [deck1, deck2]}
-    
-    game = Game("A Game", board=board, players=players, npcs=npcs, decks=decks)
-    print("Game", game)
-
     game.save_to_json_file(json_path="temp/game.json")
     game = Game.load_from_json_file(json_path="temp/game.json")
 
-    assert(game != None)
+    assert game != None
     if game != None:
-        print("Game", game.name, game.board)
-        assert(game.name == "A Game")
-    
+        print(game)
+        assert len(game.board) == 419
+        
