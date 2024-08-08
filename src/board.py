@@ -93,12 +93,12 @@ class Board():
             with open(json_path, 'r') as json_file:
                 json_data = json.load(json_file, cls=LocalJSONDecoder)
             self.spaces = {int(k): v for k, v in json_data.get("spaces", {}).items()}
-            for k, v in board.spaces.items():
+            for k, v in self.spaces.items():
                 if v.id < 0:
                     v.id = int(k)
             self.last_space_id = None
         except Exception as e:
-            print("Exception", e)
+            print("Exception (Board.load_from_json_path)", e)
             pass
 
     def from_json_path(json_path):
