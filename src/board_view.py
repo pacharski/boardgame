@@ -1,7 +1,6 @@
 from enum import IntEnum
 from resizable import ResizableImage
-from board import Board
-from point import Point
+from model import Board, Point
 
 
 class BoardView( ResizableImage ):
@@ -199,7 +198,7 @@ if __name__ == "__main__":
 
     here = os.path.abspath(__file__)
     json_path = os.path.join(os.path.dirname(here), "../data/board.json" )
-    board = Board.load_from_json_file(json_path)
+    board = Board.from_json_path(json_path)
  
     root = tkinter.Tk()
     root.title( "viewing" )
