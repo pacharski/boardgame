@@ -64,7 +64,7 @@ class Board():
                 return CompactJSONEncoder.default(self, o)
         
         json_path = json_path if json_path != None else self.json_path
-        print("SaveToFile", json_path)
+        #print("SaveToFile", json_path)
         
         with open(json_path, 'w') as json_file:
                   json.dump(self, json_file, indent=2, sort_keys=False,

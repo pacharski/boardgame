@@ -10,12 +10,12 @@ class MarkerTestCase(unittest.TestCase):
         t5 = Marker("W-er", "white", "star")
 
         self.markers = [t1, t2, t3, t4, t5]
-        for marker in self.markers:
-            print(marker)
+        # for marker in self.markers:
+        #     print(marker)
 
     def test_create_with_name_color_shape(self):
         t1 = Marker("G-er", "green", "square") 
-        print(t1)
+        #print(t1)
         self.assertEqual(t1.name, 
                          "G-er",
                          "Marker: name not set in constructor")

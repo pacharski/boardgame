@@ -35,23 +35,21 @@ class BoardTestCase(unittest.TestCase):
                 return dct
 
         here = os.path.abspath(__file__)
-        print("Here", here)
         json_path = os.path.join(os.path.dirname(here), "../../../data/board.json" )
-        print("JsonPath", json_path)
-
+        
         board = Board(json_path)
         assert len(board) == 419
         board.save_to_json_path(json_path="temp/board.json")
         board1 = Board("temp/board.json")
         board2 = Board.from_json_path("temp/board.json")
 
-        print(board1)
+        #print(board1)
         assert len(board1.spaces) == len(board2.spaces)
         assert len(board1.spaces) == 419
         assert len(board1) == 419
     
-        print("Find(100,100)", board1.find_space(Point(100, 100)))
+        #print("Find(100,100)", board1.find_space(Point(100, 100)))
         assert board1.find_space(Point(100, 100))[0] == 333
-        print("Find(200,100)", board1.find_space(Point(200, 100)))
+        #print("Find(200,100)", board1.find_space(Point(200, 100)))
         assert board1.find_space(Point(200, 100))[0] == 329
         
