@@ -1,13 +1,10 @@
-import sys
-import os
-# sys.path.append('../view')                # so tests will find model
-# sys.path.append('./view')                 # so tests will find model
-# sys.path.append('./board_game')           # so model will find view
-# sys.path.append('./board_game/view')      # so model will find view
+print("BoardGame.board_game.view.__init__")
 
-# print()
-# print()
-# print("view.__init__", os.getcwd())
-# print("SysPath", sys.path)
-# print()
-# print()
+import os
+import sys
+
+# organization is package/module/submodule
+submodule = os.path.dirname(os.path.abspath(__file__))
+module = os.path.dirname(submodule)
+package = os.path.dirname(module)
+sys.path.insert(0, package)
