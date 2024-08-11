@@ -1,3 +1,6 @@
+# organization is package/module/submodule
+import setup
+
 from copy import deepcopy
 
 class Point():
@@ -32,20 +35,6 @@ class Point():
 
 import json        
 if __name__ == "__main__":
-    class PointEncoder(json.JSONEncoder):
-        def default(self, o):
-            if isinstance(o, Point):
-                return o.json_encode()
-            return json.JSONEncoder.default(self, o)
-        
-    class PointDecoder(json.JSONDecoder):
-        def __init__(self, *args, **kwargs):
-            json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-        def object_hook(self, dct):
-            if 'Point' in dct:
-                return Point.json_decode(dct)
-            return dct
-
     p1 = Point()
     p2 = Point(x=5)
     p3 = Point(y=4)
@@ -61,15 +50,4 @@ if __name__ == "__main__":
     print(p4)
     print(p5)
     print()
-
-    filename = "temp/point.json"
-    with open(filename, 'w') as jsonfile:
-        json.dump(points, jsonfile, cls=PointEncoder)
-    with open(filename, 'r') as jsonfile:
-        points_copy = json.load(jsonfile, cls=PointDecoder)
-    assert len(points) == len(points_copy)
-    for idx in range(len(points)):
-        print("{} == {}".format(points[idx], points_copy[idx]))
-        assert points[idx].x == points_copy[idx].x
-        assert points[idx].y == points_copy[idx].y
         

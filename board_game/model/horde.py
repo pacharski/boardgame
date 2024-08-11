@@ -1,3 +1,6 @@
+# organization is package/module/submodule
+import setup
+
 import csv
 
 
@@ -75,5 +78,5 @@ if __name__ == '__main__':
     assert len(horde1) == len(horde2)
     assert len(horde1) == 61
 
-    # for creature in horde1:
-    #     print(creature)
+    for creature in horde1:
+        print(creature)

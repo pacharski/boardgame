@@ -1,12 +1,15 @@
+# organization is package/module/submodule
+import setup
+
 import os
 import json
 from collections import OrderedDict
 
-from json_encoder import CompactJSONEncoder
-from point import Point
-from space import Space
-from path import Path
-from exit import Exit
+from board_game.model.json_encoder import CompactJSONEncoder
+from board_game.model.point import Point
+from board_game.model.path import Path
+from board_game.model.exit import Exit
+from board_game.model.space import Space
 
 
 class Board():
@@ -64,8 +67,6 @@ class Board():
                 return CompactJSONEncoder.default(self, o)
         
         json_path = json_path if json_path != None else self.json_path
-        #print("SaveToFile", json_path)
-        
         with open(json_path, 'w') as json_file:
                   json.dump(self, json_file, indent=2, sort_keys=False,
                             cls=LocalJSONEncoder, ensure_ascii = False)
@@ -110,9 +111,11 @@ if __name__ == "__main__":
     json_path = os.path.join(os.path.dirname(here), "../../data/board.json" )
 
     board = Board(json_path)
-    board.save_to_json_path(json_path="temp/board.json")
-    board1 = Board("temp/board.json")
-    board2 = Board.from_json_path("temp/board.json")
+    print("CWD", os.getcwd())
+    temp_path = os.path.join(os.path.dirname(here), "temp/board.json")
+    board.save_to_json_path(temp_path)
+    board1 = Board(temp_path)
+    board2 = Board.from_json_path(temp_path)
 
     print(board1)
     assert len(board1.spaces) == len(board2.spaces)

@@ -1,3 +1,6 @@
+# organization is package/module/submodule
+import setup
+
 from enum import IntEnum
 
 
@@ -60,52 +63,6 @@ class Path():
                        )
     
     
-import json 
 if __name__ == "__main__":
-    class PathEncoder(json.JSONEncoder):
-        def default(self, o):
-            if isinstance(o, Path):
-                return o.json_encode()
-            return json.JSONEncoder.default(self, o)
-        
-    class PathDecoder(json.JSONDecoder):
-        def __init__(self, *args, **kwargs):
-            json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-        def object_hook(self, dct):
-            if 'Path' in dct:
-                return Path.json_decode(dct)
-            return dct
-
-    c1 = Path()
-    c1.name = "c1"
-    c1.origin=11
-    c1.terminus=71
-    c1.forward = c1.backward = Path.Type.cSecretDoor
-
-    c2 = Path(name="c2", origin=13, terminus=23)
-    c2.forward = Path.Type.cDoor
-
-    c3 = Path(name="c3", origin=13, terminus=23)
-    c3.backward = Path.Type.cImpasse
-
-    print(c1)
-    print(c2)
-    print(c3)
- 
-    paths = [c1, c2, c3]
-    filename = "temp/path.json"
-    with open(filename, 'w') as jsonfile:
-        json.dump(paths, jsonfile, cls=PathEncoder)
-    with open(filename, 'r') as jsonfile:
-        paths_copy = json.load(jsonfile, cls=PathDecoder)
-    assert len(paths) == len(paths_copy)
-    for idx in range(len(paths)):
-        print("{} == {}".format(paths[idx], paths_copy[idx]))
-        assert paths[idx].name  == paths_copy[idx].name
-        print("{} == {}".format(paths[idx].origin, paths_copy[idx].origin))
-        print("{} == {}".format(type(paths[idx].origin), type(paths_copy[idx].origin)))
-        assert paths[idx].origin == paths_copy[idx].origin
-        assert paths[idx].terminus == paths_copy[idx].terminus
-        assert paths[idx].forward == paths_copy[idx].forward
-        assert paths[idx].backward == paths_copy[idx].backward
-    
+    print(Path())
+    print(Path("HereToThere", 10, 12, Path.Type.cSecretDoor, Path.Type.cDoor))

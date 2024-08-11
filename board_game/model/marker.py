@@ -1,3 +1,6 @@
+# organization is package/module/submodule
+import setup
+
 class Marker():
     cShapes = ["circle", "triangle", "square", "pentagon", "hexagon",
                "star"]
@@ -41,24 +44,6 @@ class Marker():
         
 
 if __name__ == '__main__':
-    import os
-    import json
-    from json_encoder import CompactJSONEncoder
-
-    class LocalEncoder(CompactJSONEncoder):
-        def default(self, o):
-            if isinstance(o, Marker):
-                return o.json_encode()
-            return CompactJSONEncoder.default(self, o)
-    
-    class LocalDecoder(json.JSONDecoder):
-        def __init__(self, *args, **kwargs):
-            json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-        def object_hook(self, dct):
-            if "Marker" in dct:
-                return Marker.json_decode(dct)
-            return dct
-        
     t1 = Marker("G-er", "green", "square") 
     t2 = Marker("B-er", "blue",  "circle") 
     t3 = Marker("R-er", "red",   "triangle")  
@@ -68,12 +53,3 @@ if __name__ == '__main__':
     markers = [t1, t2, t3, t4, t5]
     for marker in markers:
         print(marker)
-
-    filename = "temp/marker.json"
-    with open(filename, 'w') as jsonfile:
-        json.dump(markers, jsonfile, cls=LocalEncoder)
-    with open(filename, 'r') as jsonfile:
-        markers_copy = json.load(jsonfile, cls=LocalDecoder)
-
-    assert len(markers) == len(markers_copy)
-    assert markers[0].name == markers_copy[0].name

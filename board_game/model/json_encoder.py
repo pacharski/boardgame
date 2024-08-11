@@ -104,7 +104,7 @@ class CompactJSONEncoder(json.JSONEncoder):
             raise ValueError(
                 f"indent must either be of type int or str (is: {type(self.indent)})"
             )
-
+    
 
 if __name__ == "__main__":
     import sys
@@ -128,3 +128,8 @@ if __name__ == "__main__":
         exit()
     
     json.dump(json.load(sys.stdin), sys.stdout, cls=CompactJSONEncoder)
+
+
+            
+
+        

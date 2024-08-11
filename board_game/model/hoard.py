@@ -1,3 +1,6 @@
+# organization is package/module/submodule
+import setup
+
 import csv
 
 
@@ -68,5 +71,5 @@ if __name__ == '__main__':
     assert len(hoard1) == len(hoard2)
     assert len(hoard1) == 80
     
-    # for treasure in hoard1:
-    #     print(treasure)
+    for treasure in hoard1:
+        print(treasure)
