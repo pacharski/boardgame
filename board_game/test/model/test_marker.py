@@ -1,4 +1,7 @@
 import unittest
+import json
+
+from model.json_encoder import CompactJSONEncoder
 from model.marker import Marker
 
 class MarkerTestCase(unittest.TestCase):
@@ -11,7 +14,7 @@ class MarkerTestCase(unittest.TestCase):
 
         self.markers = [t1, t2, t3, t4, t5]
 
-    def test_create_with_name_color_shape(self):
+    def test_marker_construct(self):
         t1 = Marker("G-er", "green", "square") 
         self.assertEqual(t1.name, 
                          "G-er",
@@ -23,10 +26,7 @@ class MarkerTestCase(unittest.TestCase):
                          "square",
                          "Marker: shape not set in constructor")
 
-    def test_read_write_json(self):
-        import json
-        from model.json_encoder import CompactJSONEncoder
-
+    def test_marker_json(self):
         class LocalEncoder(CompactJSONEncoder):
             def default(self, o):
                 if isinstance(o, Marker):
@@ -41,7 +41,7 @@ class MarkerTestCase(unittest.TestCase):
                     return Marker.json_decode(dct)
                 return dct
 
-        filename = "temp/marker.json"
+        filename = "test/temp/marker.json"
         with open(filename, 'w') as jsonfile:
             json.dump(self.markers, jsonfile, cls=LocalEncoder)
         with open(filename, 'r') as jsonfile:

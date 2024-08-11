@@ -16,6 +16,11 @@ class Point():
         form = "Point: ({x}, {y})"
         return form.format(x=self.x, y=self.y)
     
+    def __eq__(self, point):
+        return ((point != None)
+            and (self.x == point.x) 
+            and (self.y == point.y))
+    
     def json_encode(self):
         return { "Point": self.xy }
     

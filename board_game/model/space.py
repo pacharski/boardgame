@@ -6,7 +6,6 @@ from point import Point
 class Space():
     def __init__(self, id=-1, name="space", level=-1,
                        center=None, vertices=[], exits=[] ):
-        
         self.id = id
         self.name = name
         self.level = level

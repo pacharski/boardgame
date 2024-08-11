@@ -20,7 +20,19 @@ class SpaceTestCase(unittest.TestCase):
         s5.add_vertex(Point(11,12))
         self.spaces = [s1, s2, s3, s4, s5]
 
-    def test_read_write_json(self):
+    def test_space_construct(self):
+        space = Space()
+        self.assertTrue(isinstance(space, Space), "Space() constructs object of type Space")
+        self.assertEqual((space.id, space.name, space.level, space.center, 
+                          len(space.vertices), len(space.exits)),
+                         (-1, "space", -1, None, 0, 0),
+                         "space default is blank")
+        
+    def test_space_center_is_type_Point(self):
+        space = Space(id=2, name="Crypt", center=Point(5, 6), level=4)
+        self.assertTrue(isinstance(space .center, Point), "space.center is type Point")
+
+    def test_space_json(self):
         class LocalEncoder(json.JSONEncoder):
             def default(self, o):
                 if isinstance(o, Space):
@@ -35,32 +47,34 @@ class SpaceTestCase(unittest.TestCase):
                     return Space.json_decode(dct)
                 return dct
 
-        json_path = "temp/space.json"
+        json_path = "test/temp/space.json"
         with open(json_path, 'w') as json_file:
             json.dump(self.spaces, json_file, cls=LocalEncoder)
         with open(json_path, 'r') as json_file:
-            self.spaces_copy = json.load(json_file, cls=LocalDecoder)
+            spaces_copy = json.load(json_file, cls=LocalDecoder)
+
+        self.assertEqual(len(self.spaces),
+                            len(spaces_copy),
+                            "Len(spaces) not the same after json write/read")
         
-        def test_create_with_name_color_shape(self):
-            self.assertEqual(len(spaces),
-                             len(spaces_copy),
-                             "Len(spaces) not the same after json write/read")
-            for idx in range(len(spaces)):
-                self.assertEqual(spaces[idx].id,
-                                 spaces_copy[idx].id,
-                                 "space id not the same after json write/read")
-                self.assertEqual(spaces[idx].name,
-                                 spaces_copy[idx].name,
-                                 "space name not the same after json write/read")
-                self.assertEqual(spaces[idx].level,
-                                 spaces_copy[idx].level,
-                                 "space level not the same after json write/read")
-                self.assertEqual(spaces[idx].center,
-                                 spaces_copy[idx].center,
-                                 "space center not the same after json write/read")
-                self.assertEqual(len(spaces[idx].vertices),
-                                 len(spaces_copy[idx].vertices),
-                                 "space vertices count not the same after json write/read")
-                self.assertEqual(len(spaces[idx].exits),
-                                 len(spaces_copy[idx].exits),
-                                 "space exits count not the same after json write/read")
+        for space, space_copy in zip(self.spaces, spaces_copy):
+            self.assertTrue(isinstance(space, Space), "space for json write is type Space")
+            self.assertTrue(isinstance(space_copy, Space), "space from json read is type Space")
+            self.assertEqual(space.id,
+                             space_copy.id,
+                             "space id not the same after json write/read")
+            self.assertEqual(space.name,
+                             space_copy.name,
+                             "space name not the same after json write/read")
+            self.assertEqual(space.level,
+                             space_copy.level,
+                             "space level not the same after json write/read")
+            self.assertEqual(space.center,
+                             space_copy.center,
+                             "space center not the same after json write/read")
+            self.assertEqual(len(space.vertices),
+                             len(space_copy.vertices),
+                             "space vertices count not the same after json write/read")
+            self.assertEqual(len(space.exits),
+                             len(space_copy.exits),
+                             "space exits count not the same after json write/read")
