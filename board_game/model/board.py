@@ -57,6 +57,11 @@ class Board():
     def json_decode(json_dict):
         if "Board" in json_dict:
             spaces = json_dict["Board"]["spaces"]
+            spaces = {int(k): v for k, v in spaces.items()}
+            for k, v in spaces.items():
+                if v.id < 0:
+                    v.id = int(k)
+            #self.last_space_id = None
             return Board(spaces=spaces)
         
     def save_to_json_path(self, json_path=None):

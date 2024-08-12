@@ -1,7 +1,7 @@
 # organization is package/module/submodule
 import setup
 
-from marker import Marker
+from board_game.model.marker import Marker
 
 class Player():
     def __init__(self, name, marker, decks={}, location=None, id=None):
