@@ -14,15 +14,20 @@ class Card():
         return form.format(self.name, self.value) 
                            
     def json_encode(self):
-        return {"Card": {"name": self.name,
-                         "value": self.value}}
+        return {"__type__": "Card",
+                "name":     self.name,
+                "value":    self.value}
     
     # Note: this is a class function
     def json_decode(json_dict):
-        if "Card" in json_dict:
-            name      = json_dict["Card"]["name"]
-            value     = json_dict["Card"]["value"]
+        local_dict = (json_dict["Card"] if "Card" in json_dict else
+                      json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Card")) else
+                      None)
+        if local_dict != None:
+            name      = local_dict["name"]
+            value     = local_dict["value"]
             return Card(name, value=value)
+        return json_dict
     
     
 class Deck():
@@ -30,6 +35,8 @@ class Deck():
     def __init__(self, name, cards=[], face=None, back=None):
         self.name = name
         self.cards = cards
+        self.face = face
+        self.back = back
 
     def __iter__(self):
         for card in self.cards:
@@ -44,15 +51,24 @@ class Deck():
         return form.format(self.name, size)
         
     def json_encode(self):
-        return {"Deck": {"name":  self.name,
-                         "cards": self.cards}}
+        return {"__type__": "Deck",
+                "name":     self.name,
+                "cards":    self.cards,
+                "face":     self.face,
+                "back":     self.back}
                 
-    # Note: this is a class function
+    # Note: this is a class function, suitable to use for json load object_hook
     def json_decode(json_dict):
-        if "Deck" in json_dict:
-            name      = json_dict["Deck"]["name"]
-            cards     = json_dict["Deck"]["cards"]
-            return Deck(name=name, cards=cards)
+        local_dict = (json_dict["Deck"] if "Deck" in json_dict else
+                      json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Deck")) else
+                      None)
+        if local_dict != None:
+            name      = local_dict["name"]
+            cards     = local_dict["cards"]
+            face      = local_dict["face"]
+            back      = local_dict["back"]
+            return Deck(name=name, cards=cards, face=face, back=back)
+        return Card.json_decode(json_dict)
 
         
 if __name__ == '__main__':

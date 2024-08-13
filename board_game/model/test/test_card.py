@@ -1,106 +1,103 @@
-class Card():
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value
+import unittest
 
-    def __mul__(self, n):
-        return [self for _ in range(n)]
+import json
 
-    def __str__(self):
-        form = "Card: {} Value={}"
-        return form.format(self.name, self.value) 
-                           
-    def json_encode(self):
-        return {"Card": {"name": self.name,
-                         "value": self.value}}
-    
-    # Note: this is a class function
-    def json_decode(json_dict):
-        if "Card" in json_dict:
-            name      = json_dict["Card"]["name"]
-            value     = json_dict["Card"]["value"]
-            return Card(name, value=value)
-    
-    
-class Deck():
-    """A collection (list) of Cards with common components of the face and back"""
-    def __init__(self, name, cards=[], face=None, back=None):
-        self.name = name
-        self.cards = cards
+from model.json_encoder import CompactJSONEncoder
+from board_game.model.card import Card, Deck
 
-    def __iter__(self):
-        for card in self.cards:
-            yield card
-
-    def __len__(self):
-        return len(self.cards)
-
-    def __str__(self):
-        form = "Deck: {} size={}"
-        size = len(self.cards) if isinstance(self.cards, list) else "Invalid"
-        return form.format(self.name, size)
         
-    def json_encode(self):
-        return {"Deck": {"name":  self.name,
-                         "cards": self.cards}}
+class CardTestCase(unittest.TestCase):
+    def setUp(self):
+        card1 = Card("Zap",   value="Zap")
+        card2 = Card("Zop",   value="Zop")
+        card3 = Card("Phase", value="Phase")
+        self.cards = [card1, card2, card3]
+        self.deck = Deck("Spell Cards", cards=[*(card1 * 9), *(card2 * 9), *(card3 * 6)])
+    
+    def test_card_construct(self):
+        card = Card("Card1", "Value1")
+        self.assertEqual((card.name, card.value),
+                         ("Card1", "Value1"),
+                         'Card("Card1", "Value1") is ("Card1", "Value1")')
+        
+    def test_card_mul(self):
+        card = Card("Ace", "Hearts")
+        cards = card * 4
+        self.assertEqual(len(cards), 4, "Card * 4, is list of 4 cards")
+        cards[0].name = "King"
+        cards[1].value = "Clubs"
+        for card in cards:
+            self.assertEqual((card.name, card.value),
+                             ("King", "Clubs"),
+                             "Cards from mul are shallow copies")
                 
-    # Note: this is a class function
-    def json_decode(json_dict):
-        if "Deck" in json_dict:
-            name      = json_dict["Deck"]["name"]
-            cards     = json_dict["Deck"]["cards"]
-            return Deck(name=name, cards=cards)
+    def test_card_json(self):
+        class LocalEncoder(json.JSONEncoder):
+            def default(self, o):
+                if isinstance(o, Card):
+                    return o.json_encode()
+                return json.JSONEncoder.default(self, o)
 
+        temp_str = json.dumps(self.cards, cls=LocalEncoder)
+        cards_copy = json.loads(temp_str, object_hook=Card.json_decode)
+    
+        self.assertEqual(len(self.cards),
+                             len(cards_copy),
+                             "list of cards preserved after json dumps/loads")
         
-if __name__ == '__main__':
-    import json
-    from json_encoder import CompactJSONEncoder
+        for card, card_copy in zip(self.cards, cards_copy):
+            self.assertEqual((card.name, card.value),
+                             (card_copy.name, card_copy.value),
+                             "card name/value preserved after json dumps/loads")
+            
+    def test_deck_construct(self):
+        deck1 = Deck("Spells", cards=[*(self.cards[0] * 6), *(self.cards[1] * 6), *(self.cards[2] * 4)])
+        deck2 = Deck("Test", self.cards, 
+                     face={"Layout": "Standard", "bg_color": "white", "fg_color": "black"},
+                     back={"Image": "CardBack.png", "bg_color": "black", "fg_color": "white", 
+                           "text": "Test"})
+        self.assertEqual((deck1.name, len(deck1)),
+                         ("Spells", 16),
+                         "Spells Deck Name/Length match")
+        self.assertEqual((deck2.name, len(deck2), len(deck2.face), len(deck2.back)),
+                         ("Test", 3, 3, 4),
+                         "Test Deck Name/#Cards/#face/#back match")
+        
+    def test_deck_json(self):
+        class LocalEncoder(json.JSONEncoder):
+            def default(self, o):
+                if isinstance(o, (Card, Deck)):
+                    return o.json_encode()
+                return json.JSONEncoder.default(self, o)
 
-    class LocalEncoder(CompactJSONEncoder):
-        def default(self, o):
-            if isinstance(o, (Deck, Card)):
-                return o.json_encode()
-            return CompactJSONEncoder.default(self, o)
+        temp_str = json.dumps(self.deck, cls=LocalEncoder)
+        deck_copy = json.loads(temp_str, object_hook=Deck.json_decode)
     
-    class LocalDecoder(json.JSONDecoder):
-        def __init__(self, *args, **kwargs):
-            json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-        def object_hook(self, dct):
-            if "Deck" in dct:
-                return Deck.json_decode(dct)
-            if "Card" in dct:
-                return Card.json_decode(dct)
-            return dct
+        self.assertEqual((self.deck.name, len(self.deck)),
+                         (deck_copy.name, len(deck_copy)),
+                         "Name/Length of deck preserved after json dumps/loads")
+        
+        deck2 = Deck("Deck2", self.cards, 
+                     face={"Style": "common"},
+                     back={"Layout": "centered", "bg_color": "black"})
+        
+        temp_str = json.dumps(deck2, cls=LocalEncoder)
+        deck2_copy = json.loads(temp_str, object_hook=Deck.json_decode)
     
-    card1 = Card("Zap",   value="Zap")
-    card2 = Card("Zop",   value="Zop")
-    card3 = Card("Phase", value="Phase")
-    print(card1)
-    print(card2)
-    print(card3)
-    print()
+        self.assertEqual((deck2.name, len(deck2)),
+                         (deck2_copy.name, len(deck2_copy)),
+                         "Name/Length of deck2 preserved after json dumps/loads")
+        
+        self.assertEqual((len(deck2.face), deck2.face["Style"]),
+                         (1, "common"),
+                         "Deck2 face preserved after json dumps/loads")
 
-    deck = Deck("Spell Cards", cards=[*(card1 * 9), *(card2 * 9), *(card3 * 6)])
-    print("Deck", deck)
-    print()
-
-    filename = "temp/card.json"
-    with open(filename, 'w') as jsonfile:
-        json.dump(card1, jsonfile, cls=LocalEncoder)
-    with open(filename, 'r') as jsonfile:
-        card1_copy = json.load(jsonfile, cls=LocalDecoder)
-
-    assert card1.name == card1_copy.name
-    assert card1.value == card1_copy.value
+        self.assertEqual((len(deck2.back), deck2.back["Layout"], deck2.back["bg_color"]),
+                         (2, "centered", "black"),
+                         "Deck2 back preserved after json dumps/loads")
+        
+        for card, card_copy in zip(deck2, deck2_copy):
+            self.assertEqual((card.name, card.value),
+                             (card_copy.name, card_copy.value),
+                             "card name/value preserved after json dumps/loads")
     
-    filename = "temp/deck.json"
-    with open(filename, 'w') as jsonfile:
-        json.dump(deck, jsonfile, cls=LocalEncoder)
-    with open(filename, 'r') as jsonfile:
-        deck_copy = json.load(jsonfile, cls=LocalDecoder)
-
-    assert deck.name == deck_copy.name
-    assert len(deck) == len(deck_copy)
-    for card, card_copy in zip(deck, deck_copy):
-        assert card.name == card_copy.name
-        assert card.value == card_copy.value
