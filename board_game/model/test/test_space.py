@@ -39,19 +39,8 @@ class SpaceTestCase(unittest.TestCase):
                     return o.json_encode()
                 return json.JSONEncoder.default(self, o)
             
-        class LocalDecoder(json.JSONDecoder):
-            def __init__(self, *args, **kwargs):
-                json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-            def object_hook(self, dct):
-                if 'Space' in dct:
-                    return Space.json_decode(dct)
-                return dct
-
-        json_path = "test/temp/space.json"
-        with open(json_path, 'w') as json_file:
-            json.dump(self.spaces, json_file, cls=LocalEncoder)
-        with open(json_path, 'r') as json_file:
-            spaces_copy = json.load(json_file, cls=LocalDecoder)
+        temp_str = json.dumps(self.spaces, cls=LocalEncoder)
+        spaces_copy = json.loads(temp_str, object_hook=Space.json_decode)
 
         self.assertEqual(len(self.spaces),
                             len(spaces_copy),

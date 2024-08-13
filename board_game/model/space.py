@@ -44,22 +44,25 @@ class Space():
         return len(self.exits)
     
     def json_encode(self):
-        return { "Space": { "id": self.id,
-                            "center": None if self.center == None else list(self.center.xy),
-                            "level": self.level if self.level != None else 0,
-                            "name": self.name,
+        return { "Space": { "id":       self.id,
+                            "center":   None if self.center == None else list(self.center.xy),
+                            "level":    self.level if self.level != None else 0,
+                            "name":     self.name,
                             "vertices": [list(v.xy) for v in self.vertices],
-                            "exits": self.exits } }
+                            "exits":    self.exits } }
     
     # Note: this is a class function
     def json_decode(json_dict):
-        if "Space" in json_dict:
-            id = json_dict["Space"]["id"]
-            name = json_dict["Space"]["name"]
-            level = json_dict["Space"]["level"]
-            center = json_dict["Space"]["center"]
-            vertices = json_dict["Space"]["vertices"]
-            exits = json_dict["Space"].get("exits", [])
+        space_dict = (json_dict["Space"] if ("Space" in json_dict) else
+                      json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Space")) else
+                      None)
+        if space_dict != None:
+            id       = space_dict["id"]
+            name     = space_dict["name"]
+            level    = space_dict["level"]
+            center   = space_dict["center"]
+            vertices = space_dict["vertices"]
+            exits    = space_dict.get("exits", [])
             return Space(id=int(id),
                          name=name,
                          level=int(level),
@@ -67,6 +70,7 @@ class Space():
                          vertices=[Point(x=int(v[0]), y=int(v[1])) for v in vertices],
                          exits=[exit for exit in exits]
                         )
+        return json_dict
     
     def __str__(self):
         form="Space {id}:  Name={name} Center={center} Level={level}, Exits={exits} Vertices={sides}"

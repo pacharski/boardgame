@@ -71,28 +71,16 @@ class PointTestCase(unittest.TestCase):
                 if isinstance(o, Point):
                     return o.json_encode()
                 return json.JSONEncoder.default(self, o)
-            
-        class LocalDecoder(json.JSONDecoder):
-            def __init__(self, *args, **kwargs):
-                json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-            def object_hook(self, dct):
-                if 'Point' in dct:
-                    return Point.json_decode(dct)
-                return dct
 
-        def test_json_write_read(self):
-            json_path = "temp/point.json"
-            with open(json_path, 'w') as json_file:
-                json.dump(self.points, json_file, cls=LocalEncoder)
-            with open(json_path, 'r') as json_file:
-                points_copy = json.load(json_file, cls=LocalDecoder)
-        
-            self.assertEqual(len(self.points),
+        temp_str = json.dumps(self.points, cls=LocalEncoder)
+        points_copy = json.loads(temp_str, object_hook=Point.json_decode)
+    
+        self.assertEqual(len(self.points),
                              len(points_copy),
                              "list of points preserved after json file write/read")
+        
+        for point, point_copy in zip(self.points, points_copy):
+            self.assertEqual(point.xy,
+                             point_copy.xy,
+                             "point xy preserved after json file write/read")
             
-            for point, point_copy in zip(self.points, points_copy):
-                self.assertEqual(point.xy,
-                                 point_copy.xy,
-                                 "point xy preserved after json file write/read")
-                

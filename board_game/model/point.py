@@ -25,12 +25,17 @@ class Point():
             and (self.y == point.y))
     
     def json_encode(self):
-        return { "Point": self.xy }
+        return {"__type__": "Point",
+                "xy":       self.xy }
     
     def json_decode(json_dict):
         if "Point" in json_dict:
             xy = json_dict["Point"]
             return Point(x=int(xy[0]), y=int(xy[1]))
+        if ("__type__" in json_dict) and (json_dict["__type__"] == "Point"):
+            xy = json_dict["xy"]
+            return Point(x=int(xy[0]), y=int(xy[1]))
+        return json_dict
                          
 
 import json        
