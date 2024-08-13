@@ -69,17 +69,3 @@ class Deck():
             back      = local_dict["back"]
             return Deck(name=name, cards=cards, face=face, back=back)
         return Card.json_decode(json_dict)
-
-        
-if __name__ == '__main__':
-    card1 = Card("Zap",   value="Zap")
-    card2 = Card("Zop",   value="Zop")
-    card3 = Card("Phase", value="Phase")
-    print(card1)
-    print(card2)
-    print(card3)
-    print()
-
-    deck = Deck("Spell Cards", cards=[*(card1 * 9), *(card2 * 9), *(card3 * 6)])
-    print("Deck", deck)
-    print()

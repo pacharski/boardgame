@@ -36,23 +36,3 @@ class Point():
             xy = json_dict["xy"]
             return Point(x=int(xy[0]), y=int(xy[1]))
         return json_dict
-                         
-
-import json        
-if __name__ == "__main__":
-    p1 = Point()
-    p2 = Point(x=5)
-    p3 = Point(y=4)
-    p4 = Point(x=6, y=8)
-    p5 = p4.deep_copy()
-    p5.y = 12
-
-    points = [p1, p2, p3, p4, p5]
-    
-    print(p1)
-    print(p2)
-    print(p3)
-    print(p4)
-    print(p5)
-    print()
-        

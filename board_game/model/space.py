@@ -79,8 +79,3 @@ class Space():
                            exits=self.num_exits, 
                            sides=self.num_vertices 
                           )
-    
-
-if __name__ == "__main__":
-    print(Space())
-    print(Space(0, "Well lit Chamber", 0))
