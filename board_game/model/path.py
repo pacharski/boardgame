@@ -18,12 +18,12 @@ class Path():
                 "")
 
     def __init__(self, name="", origin=None, terminus=None,
-                       forward=Type.cClear, backward=Type.cClear):
+                       forward=Type.cClear, backward=None):
         self.name      = name
         self.origin    = origin
         self.terminus  = terminus
         self.forward   = forward
-        self.backward  = backward
+        self.backward  = backward if backward != None else self.forward
 
     def reset(self):
         self.name = ""
@@ -61,8 +61,3 @@ class Path():
                         forward=int(forward),
                         backward=int(backward)
                        )
-    
-    
-if __name__ == "__main__":
-    print(Path())
-    print(Path("HereToThere", 10, 12, Path.Type.cSecretDoor, Path.Type.cDoor))
