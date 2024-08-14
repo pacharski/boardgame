@@ -31,5 +31,13 @@ class MarkerTestCase(unittest.TestCase):
         temp_str = json.dumps(self.markers, default=jsoninator.default)
         markers_copy = json.loads(temp_str, object_hook=jsoninator.object_hook)
 
-        assert len(self.markers) == len(markers_copy)
-        assert self.markers[0].name == markers_copy[0].name
+        self.assertEqual(len(self.markers), len(markers_copy),
+                         "Markers length match after json dumps/loads")
+        for marker, marker_copy in zip(self.markers, markers_copy):
+            self.assertEqual(marker.name, marker_copy.name,
+                             "Marker.name match after json dumps/loads")
+            self.assertEqual(marker.color, marker_copy.color,
+                             "Marker.color match after json dumps/loads")
+            self.assertEqual(marker.shape, marker_copy.shape,
+                             "Marker.shape match after json dumps/loads")
+            

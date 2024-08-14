@@ -2,8 +2,8 @@ import unittest
 
 import json
 
-from board_game.model.jsoninator import Jsoninator
-from board_game.model.card import Card, Deck
+from model.jsoninator import Jsoninator
+from model.card import Card, Deck
 
         
 class CardTestCase(unittest.TestCase):

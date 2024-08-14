@@ -2,9 +2,9 @@ import unittest
 
 import json
 
-from board_game.model.jsoninator import Jsoninator
-from board_game.model.space import Space
-from board_game.model.point import Point
+from model.jsoninator import Jsoninator
+from model.space import Space
+from model.point import Point
         
         
 class SpaceTestCase(unittest.TestCase):

@@ -1,111 +1,70 @@
-from copy import deepcopy
+import unittest
+import json
 
-class Exit():
-    cBarriers = ["", "Door", "Secret Door"]
-    
-    def __init__(self, name="", destination=None, barrier="", open=set()):
-        self.name        = name
-        self.destination = destination
-        self.barrier     = barrier
-        self.open        = open # per player (for secrect doors)
+from model.jsoninator import Jsoninator
+from model.exit import Exit
+
+class ExitTestCase(unittest.TestCase):
+    def setUp(self):
+        e1 = Exit()
+        e1.name = "exit1"
+        e1.destination = 71
+        e1.barrier = "Secret Door"
+        e2 = Exit(name="NE Exit", destination=23)
+        e2.barrier = "Door"
+        e3 = Exit(name="Dark Tunnel", barrier = "")
+        e3.destination = 34
+        e4 = e3.deep_copy()
+        e4.destination = 45
+        self.exits = [e1, e2, e3, e4]
+
+    def test_exit_construct_default(self):
+        e1 = Exit()
+        self.assertEqual((e1.name, e1.destination, e1.barrier, e1.open), 
+                         ("", None, "", set()),
+                         "Exit: default constructor")
         
-    def reset(self):
-        self.name = ""
-        self.destination = None
-        self.barrier = "" 
-        self.open = set() # per player
-
-    def deep_copy(self):
-        return deepcopy(self)
+    def test_exit_construct(self):
+        e2 = Exit(name="NE Exit", destination=23, barrier="Door")
+        self.assertEqual((e2.name, e2.destination), 
+                         ("NE Exit", 23),
+                         "Exit: name, destination set in constructor")
+        self.assertEqual(e2.barrier,
+                         "Door",
+                         "Exit: barrier set in constructor")
         
-    def __str__(self):
-        barrier_width = max([len(b) for b in Exit.cBarriers])
-        form = "Exit {}:  {: <{}} --> {}"
-        return form.format(self.name,
-                           self.barrier, barrier_width,
-                           self.destination)
-    
-    def json_encode(self):
-        return { "Exit": { "name":          self.name,
-                           "destination":   self.destination,
-                           "barrier":        self.barrier
-                         } }
-    
-    # Note: this is a class function
-    def json_decode(json_dict):
-        if "Exit" in json_dict:
-            name        = json_dict["Exit"]["name"]
-            destination = json_dict["Exit"]["destination"]
-            barrier     = json_dict["Exit"]["barrier"]
-            return Exit(name=name,
-                        destination=int(destination),
-                        barrier=barrier
-                       )
-        
-class ExitPP(Exit):
-    def __init__(self, exit, name_width=0):
-        super().__init__(exit.name, exit.destination, exit.barrier)
-        self.name_width = name_width
+    def test_exit_copy(self):
+        e2 = Exit(name="NE Exit", destination=23, barrier="Door")
+        e3 = e2
+        e2.name="Dark Tunnel"
+        e3.barrier="High Cliff"
+        self.assertEqual((e2.name, e2.destination, e2.barrier),
+                         ("Dark Tunnel", 23, "High Cliff"),
+                        "Exit: shallow copy changed by changing original")
+        self.assertEqual((e3.name, e3.destination, e3.barrier),
+                         ("Dark Tunnel", 23, "High Cliff"),
+                        "Exit: shallow copy changed by changing copy")
+       
+    def test_exit_deep_copy(self):
+        e2 = Exit(name="NE Exit", destination=23, barrier="Door")
+        e3 = e2.deep_copy()
+        e2.name="Dark Tunnel"
+        e3.barrier="High Cliff"
+        self.assertEqual((e2.name, e2.destination, e2.barrier),
+                         ("Dark Tunnel", 23, "Door"),
+                        "Exit: deep copy not changed by changing copy")
+        self.assertEqual((e3.name, e3.destination, e3.barrier),
+                         ("NE Exit", 23, "High Cliff"),
+                        "Exit: deep copy not changed by changing copy")
+       
+    def test_exit_json(self):
+        jsoninator = Jsoninator({"Exit": Exit})
+        temp_str = json.dumps(self.exits, default=jsoninator.default)
+        exits_copy = json.loads(temp_str, object_hook=jsoninator.object_hook)
 
-    def __str__(self):
-        barrier_width = max([len(b) for b in Exit.cBarriers])
-        form = "Exit {: >{}}:  {: <{}} --> {}"
-        return form.format(self.name, self.name_width,
-                           self.barrier, barrier_width,
-                           self.destination) 
-    
-    
-import json 
-if __name__ == "__main__":
-    class Encoder(json.JSONEncoder):
-        def default(self, o):
-            if isinstance(o, Exit):
-                return o.json_encode()
-            return json.JSONEncoder.default(self, o)
-        
-    class Decoder(json.JSONDecoder):
-        def __init__(self, *args, **kwargs):
-            json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-        def object_hook(self, dct):
-            if 'Exit' in dct:
-                return Exit.json_decode(dct)
-            return dct
-
-    e1 = Exit()
-    e1.name = "exit1"
-    e1.destination = 71
-    e1.barrier = "Secret Door"
-    
-    e2 = Exit(name="NE Exit", destination=23)
-    e2.barrier = "Door"
-
-    e3 = Exit(name="Dark Tunnel", barrier = "")
-    e3.destination = 34
-
-    e4 = e3.deep_copy()
-    e4.destination = 45
-
-    exits = [e1, e2, e3, e4]
-    
-    name_width = max([len(e.name) for e in exits]) + 2
-    print(ExitPP(e1, name_width))
-    print(ExitPP(e2, name_width))
-    print(ExitPP(e3, name_width))
-    print(ExitPP(e4, name_width))
-    print()
- 
-    filename = "temp/exit.json"
-    with open(filename, 'w') as jsonfile:
-        json.dump(exits, jsonfile, cls=Encoder)
-    with open(filename, 'r') as jsonfile:
-        exits_copy = json.load(jsonfile, cls=Decoder)
-    assert len(exits) == len(exits_copy)
-    name_width = max([len(e.name) for e in exits])
-    for idx in range(len(exits)):
-        exit = exits[idx]
-        exit_copy = exits_copy[idx]
-        print("{} == {}".format(ExitPP(exit, name_width), ExitPP(exit_copy, name_width)))
-        assert exit.name        == exit_copy.name
-        assert exit.destination == exit_copy.destination
-        assert exit.barrier      == exit_copy.barrier
-        
+        self.assertEqual(len(self.exits), len(exits_copy),
+                         "Length of exits match after json dumps/loads")
+        for exit, exit_copy in zip(self.exits, exits_copy):
+            self.assertEqual((exit.name, exit.destination, exit.barrier, len(exit.open)),
+                             (exit_copy.name, exit_copy.destination, exit_copy.barrier, len(exit_copy.open)),
+                             "Exit match after json dumps/loads")
