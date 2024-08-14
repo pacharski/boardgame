@@ -8,9 +8,8 @@ import pathlib
 submodule = os.path.dirname(os.path.abspath(__file__))
 module = os.path.dirname(submodule)
 package = os.path.dirname(module)
-sys.path.insert(0, package)
+project = os.path.dirname(package)
+sys.path.insert(0, project) 
 
-# sys.path.append('./model')
-# print("SysPath", sys.path)
-
-pathlib.Path('test/temp').mkdir(parents=True, exist_ok=True) 
+# use this to create directories that may be needed if they don't exist
+#pathlib.Path('test/temp').mkdir(parents=True, exist_ok=True) 

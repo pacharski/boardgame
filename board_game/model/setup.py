@@ -3,8 +3,11 @@ print("BoardGane.board_game.model.setup")
 import os
 import sys
 
-# organization is package/module/submodule
-submodule = os.path.dirname(os.path.abspath(__file__))
-module = os.path.dirname(submodule)
+# organization is project/package/module
+module = os.path.dirname(os.path.abspath(__file__))
 package = os.path.dirname(module)
-sys.path.insert(0, package)
+project = os.path.dirname(package)
+print("Add", project)
+sys.path.insert(0, project)
+print("Add", module)
+sys.path.insert(0, module)
