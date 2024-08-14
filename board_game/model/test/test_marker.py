@@ -1,7 +1,7 @@
 import unittest
 import json
 
-from model.json_encoder import CompactJSONEncoder
+from model.jsoninator import Jsoninator
 from model.marker import Marker
 
 class MarkerTestCase(unittest.TestCase):
@@ -27,25 +27,9 @@ class MarkerTestCase(unittest.TestCase):
                          "Marker: shape not set in constructor")
 
     def test_marker_json(self):
-        class LocalEncoder(CompactJSONEncoder):
-            def default(self, o):
-                if isinstance(o, Marker):
-                    return o.json_encode()
-                return CompactJSONEncoder.default(self, o)
-        
-        class LocalDecoder(json.JSONDecoder):
-            def __init__(self, *args, **kwargs):
-                json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-            def object_hook(self, dct):
-                if "Marker" in dct:
-                    return Marker.json_decode(dct)
-                return dct
-
-        filename = "test/temp/marker.json"
-        with open(filename, 'w') as jsonfile:
-            json.dump(self.markers, jsonfile, cls=LocalEncoder)
-        with open(filename, 'r') as jsonfile:
-            markers_copy = json.load(jsonfile, cls=LocalDecoder)
+        jsoninator = Jsoninator({"Marker": Marker})
+        temp_str = json.dumps(self.markers, default=jsoninator.default)
+        markers_copy = json.loads(temp_str, object_hook=jsoninator.object_hook)
 
         assert len(self.markers) == len(markers_copy)
         assert self.markers[0].name == markers_copy[0].name
