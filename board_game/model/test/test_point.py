@@ -2,8 +2,8 @@ import unittest
 
 import json
 
-from model.json_encoder import CompactJSONEncoder
-from model.point import Point
+from board_game.model.jsoninator import Jsoninator
+from board_game.model.point import Point
 
         
 class PointTestCase(unittest.TestCase):
@@ -66,14 +66,9 @@ class PointTestCase(unittest.TestCase):
         self.assertNotEqual(point1, point5, "point not equal if different x and y")
             
     def test_point_json(self):
-        class LocalEncoder(json.JSONEncoder):
-            def default(self, o):
-                if isinstance(o, Point):
-                    return o.json_encode()
-                return json.JSONEncoder.default(self, o)
-
-        temp_str = json.dumps(self.points, cls=LocalEncoder)
-        points_copy = json.loads(temp_str, object_hook=Point.json_decode)
+        jsoninator = Jsoninator({"Point": Point})
+        temp_str = json.dumps(self.points, default=jsoninator.default) 
+        points_copy = json.loads(temp_str, object_hook=jsoninator.object_hook) 
     
         self.assertEqual(len(self.points),
                              len(points_copy),

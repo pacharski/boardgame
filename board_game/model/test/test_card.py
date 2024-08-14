@@ -2,7 +2,7 @@ import unittest
 
 import json
 
-from model.json_encoder import CompactJSONEncoder
+from board_game.model.jsoninator import Jsoninator
 from board_game.model.card import Card, Deck
 
         
@@ -32,14 +32,9 @@ class CardTestCase(unittest.TestCase):
                              "Cards from mul are shallow copies")
                 
     def test_card_json(self):
-        class LocalEncoder(json.JSONEncoder):
-            def default(self, o):
-                if isinstance(o, Card):
-                    return o.json_encode()
-                return json.JSONEncoder.default(self, o)
-
-        temp_str = json.dumps(self.cards, cls=LocalEncoder)
-        cards_copy = json.loads(temp_str, object_hook=Card.json_decode)
+        jsoninator = Jsoninator({"Card": Card, "Deck": Deck})
+        temp_str = json.dumps(self.cards, default=jsoninator.default)
+        cards_copy = json.loads(temp_str, object_hook=jsoninator.object_hook)
     
         self.assertEqual(len(self.cards),
                              len(cards_copy),
@@ -64,14 +59,9 @@ class CardTestCase(unittest.TestCase):
                          "Test Deck Name/#Cards/#face/#back match")
         
     def test_deck_json(self):
-        class LocalEncoder(json.JSONEncoder):
-            def default(self, o):
-                if isinstance(o, (Card, Deck)):
-                    return o.json_encode()
-                return json.JSONEncoder.default(self, o)
-
-        temp_str = json.dumps(self.deck, cls=LocalEncoder)
-        deck_copy = json.loads(temp_str, object_hook=Deck.json_decode)
+        jsoninator = Jsoninator({"Card": Card, "Deck": Deck})
+        temp_str = json.dumps(self.deck, default=jsoninator.default)
+        deck_copy = json.loads(temp_str, object_hook=jsoninator.object_hook)
     
         self.assertEqual((self.deck.name, len(self.deck)),
                          (deck_copy.name, len(deck_copy)),
@@ -81,8 +71,8 @@ class CardTestCase(unittest.TestCase):
                      face={"Style": "common"},
                      back={"Layout": "centered", "bg_color": "black"})
         
-        temp_str = json.dumps(deck2, cls=LocalEncoder)
-        deck2_copy = json.loads(temp_str, object_hook=Deck.json_decode)
+        temp_str = json.dumps(deck2, default=jsoninator.default)
+        deck2_copy = json.loads(temp_str, object_hook=jsoninator.object_hook)
     
         self.assertEqual((deck2.name, len(deck2)),
                          (deck2_copy.name, len(deck2_copy)),

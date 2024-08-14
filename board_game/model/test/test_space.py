@@ -2,9 +2,9 @@ import unittest
 
 import json
 
-from model.space import Space
-from model.point import Point
-from model.json_encoder import CompactJSONEncoder
+from board_game.model.jsoninator import Jsoninator
+from board_game.model.space import Space
+from board_game.model.point import Point
         
         
 class SpaceTestCase(unittest.TestCase):
@@ -33,14 +33,9 @@ class SpaceTestCase(unittest.TestCase):
         self.assertTrue(isinstance(space .center, Point), "space.center is type Point")
 
     def test_space_json(self):
-        class LocalEncoder(json.JSONEncoder):
-            def default(self, o):
-                if isinstance(o, Space):
-                    return o.json_encode()
-                return json.JSONEncoder.default(self, o)
-            
-        temp_str = json.dumps(self.spaces, cls=LocalEncoder)
-        spaces_copy = json.loads(temp_str, object_hook=Space.json_decode)
+        jsoninator = Jsoninator({"Point": Point, "Space": Space})
+        temp_str = json.dumps(self.spaces, default=jsoninator.default) #cls=LocalEncoder)
+        spaces_copy = json.loads(temp_str, object_hook=jsoninator.object_hook)
 
         self.assertEqual(len(self.spaces),
                             len(spaces_copy),
