@@ -18,10 +18,31 @@ class Treasure():
     def __mul__(self, n):
         return [self for _ in range(n)]
     
+    def json_encode(self):
+        return {"__type__": "Treasure",
+                "level":    self.level,
+                "value":    self.value,
+                "ability":  self.ability,
+                "desc":     self.desc}
+                
+    # Note: this is a class function, suitable to use for json load object_hook
+    def json_decode(json_dict):
+        local_dict = (json_dict["Treasure"] if "Treasure" in json_dict else
+                      json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Treasure")) else
+                      None)
+        if local_dict != None:
+            level       = local_dict["level"]
+            value       = local_dict["value"]
+            ability     = local_dict["ability"]
+            desc        = local_dict["desc"]
+            return Treasure(int(level), int(value), ability, desc)
+        return json_dict
+    
 
 class Hoard():
-    def __init__(self, csv_path):
-        self.treasures = []
+    def __init__(self, csv_path=None, name=None, treasures=None):
+        self.name = name if name != None else ""
+        self.treasures = treasures if treasures != None else []
         if csv_path != None:
             self.load_from_csv_path(csv_path)
 
@@ -60,16 +81,18 @@ class Hoard():
         for treasure in self.treasures:
             yield treasure
 
-
-if __name__ == '__main__':
-    import os
-    
-    here = os.path.abspath(__file__)
-    csv_path = os.path.join(os.path.dirname(here), "../../data/treasures.csv")
-    hoard1 = Hoard(csv_path)
-    hoard2 = Hoard.from_csv_path(csv_path)
-    assert len(hoard1) == len(hoard2)
-    assert len(hoard1) == 80
-    
-    for treasure in hoard1:
-        print(treasure)
+    def json_encode(self):
+        return {"__type__": "Hoard",
+                "name":       self.name,
+                "treasures":  self.treasures}
+                
+    # Note: this is a class function, suitable to use for json load object_hook
+    def json_decode(json_dict):
+        local_dict = (json_dict["Hoard"] if "Hoard" in json_dict else
+                      json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Hoard")) else
+                      None)
+        if local_dict != None:
+            name      = local_dict["name"]
+            treasures = local_dict["treasures"]
+            return Hoard(name=name, treasures=treasures)
+        return json_dict
