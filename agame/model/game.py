@@ -1,17 +1,17 @@
 # organization is package/module/submodule
 import setup
 
-from board_game.model.json_encoder import CompactJSONEncoder
-from board_game.model.board import Board
-from board_game.model.space import Space
-from board_game.model.point import Point
-from board_game.model.path import Path
-from board_game.model.exit import Exit
-from board_game.model.player import Player
-from board_game.model.marker import Marker
-from board_game.model.card import Card, Deck
-from board_game.model.hoard import Hoard, Treasure
-from board_game.model.horde import Horde, Creature
+from model.json_encoder import CompactJSONEncoder
+from model.board import Board
+from model.space import Space
+from model.point import Point
+from model.path import Path
+from model.exit import Exit
+from model.player import Player
+from model.marker import Marker
+from model.card import Card, Deck
+from model.hoard import Hoard, Treasure
+from model.horde import Horde, Creature
 
 
 class Game():
