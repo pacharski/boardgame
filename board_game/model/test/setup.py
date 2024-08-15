@@ -1,5 +1,3 @@
-print("BoardGame.board_game.test.setup.py")
-
 import os
 import sys
 import pathlib
@@ -10,6 +8,7 @@ module = os.path.dirname(submodule)
 package = os.path.dirname(module)
 project = os.path.dirname(package)
 sys.path.insert(0, project) 
+sys.path.insert(0, package) 
 
 # use this to create directories that may be needed if they don't exist
 #pathlib.Path('test/temp').mkdir(parents=True, exist_ok=True) 

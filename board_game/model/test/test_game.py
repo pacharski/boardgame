@@ -1,4 +1,6 @@
-from model.json_encoder import CompactJSONEncoder
+import unittest
+
+from model.jsoninator import Jsoninator
 from model.board import Board
 from model.space import Space
 from model.point import Point

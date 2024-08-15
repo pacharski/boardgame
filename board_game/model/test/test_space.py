@@ -2,6 +2,7 @@ import unittest
 
 import json
 
+import setup
 from model.jsoninator import Jsoninator
 from model.space import Space
 from model.point import Point
@@ -34,7 +35,7 @@ class SpaceTestCase(unittest.TestCase):
 
     def test_space_json(self):
         jsoninator = Jsoninator({"Point": Point, "Space": Space})
-        temp_str = json.dumps(self.spaces, default=jsoninator.default) #cls=LocalEncoder)
+        temp_str = json.dumps(self.spaces, default=jsoninator.default)
         spaces_copy = json.loads(temp_str, object_hook=jsoninator.object_hook)
 
         self.assertEqual(len(self.spaces),
