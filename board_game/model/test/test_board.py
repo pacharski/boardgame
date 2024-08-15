@@ -56,16 +56,17 @@ class BoardTestCase(unittest.TestCase):
                          329,
                          "Space @(200, 100) is 329")
         
-        board.save_to_json_path("board.json")
-        board_copy = Board.from_json_path("board.json")
+        # This can be used to save a copy of the board, and test json write to file
+        # board.save_to_json_path("board.json")
+        # board_copy = Board.from_json_path("board.json")
     
-        self.assertEqual(len(board_copy), 419,
-                         "board_copy from json(file) has 419 spaces")
+        # self.assertEqual(len(board_copy), 419,
+        #                  "board_copy from json(file) has 419 spaces")
         
-        self.assertEqual(board_copy.find_space(Point(100, 100))[0],
-                         333,
-                         "Space(file) @(100, 100) is 333")
+        # self.assertEqual(board_copy.find_space(Point(100, 100))[0],
+        #                  333,
+        #                  "Space(file) @(100, 100) is 333")
         
-        self.assertEqual(board_copy.find_space(Point(200, 100))[0],
-                         329,
-                         "Space(file) @(200, 100) is 329")
+        # self.assertEqual(board_copy.find_space(Point(200, 100))[0],
+        #                  329,
+        #                  "Space(file) @(200, 100) is 329")

@@ -15,20 +15,23 @@ class PlayerTestCase(unittest.TestCase):
         deck1 = Deck("Spell Cards", cards=[*(card1 * 9), *(card2 * 9)])
         deck2 = Deck("Spill Cards", cards=[*(card2 * 9), *(card3 * 6)])
         
-        p1   = Player("Fred",    marker=Marker("", "green"), location=0,    id=1)
-        p2   = Player("Daphne",  marker=Marker("", "blue" ), location=23,   id=2)
-        p3   = Player("Velma",   marker=Marker("", "red"  ), location=100,  id=3)
-        p4   = Player("Scooby",  marker=Marker("", "red"  ), location=212,  id=4)
-        p5   = Player("Shaggy",  marker=Marker("", "white"), location=256,  id=5)
-        npc1 = Player("Old Man", marker=Marker("", "black", "star"), location=12, decks={"deck1": deck1, "deck2": deck2})
+        p1   = Player("Fred",    "Driver", marker=Marker("", "green"), location=0,    id=1)
+        p2   = Player("Daphne",  "Bard",   marker=Marker("", "blue" ), location=23,   id=2)
+        p3   = Player("Velma",   "Wizard", marker=Marker("", "red"  ), location=100,  id=3)
+        p4   = Player("Scooby",  "Knight", marker=Marker("", "red"  ), location=212,  id=4)
+        p5   = Player("Shaggy",  "Rogue",  marker=Marker("", "white"), location=256,  id=5)
+        npc1 = Player("Old Man", "Creep",  marker=Marker("", "black", "star"), location=12, decks={"deck1": deck1, "deck2": deck2})
         self.players = [p1, p2, p3, p4, p5, npc1]
 
 
     def test_player_construct(self):
-        p1 = Player("Waldo", marker=Marker("W", "yellow", "circle"), location=42, id=99) 
+        p1 = Player("Waldo", "Sneak", marker=Marker("W", "yellow", "circle"), location=42, id=99) 
         self.assertEqual(p1.name, 
                          "Waldo",
                          "Player: name set in constructor")
+        self.assertEqual(p1.desc, 
+                         "Sneak",
+                         "Player: desc set in constructor")
         self.assertEqual((p1.marker.name, p1.marker.color, p1.marker.shape), 
                          ("W", "yellow", "circle"),
                          "Player: marker set in constructor")
@@ -50,6 +53,8 @@ class PlayerTestCase(unittest.TestCase):
         for player, player_copy in zip(self.players, players_copy):
             self.assertEqual(player.name, player_copy.name,
                              "Player.name match after json dumps/loads")
+            self.assertEqual(player.desc, player_copy.desc,
+                             "Player.desc match after json dumps/loads")
             self.assertEqual(player.marker.name, player_copy.marker.name,
                              "Player.marker.name match after json dumps/loads")
             self.assertEqual(player.marker.color, player_copy.marker.color,
