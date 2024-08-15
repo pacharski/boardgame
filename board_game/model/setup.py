@@ -7,7 +7,7 @@ import sys
 module = os.path.dirname(os.path.abspath(__file__))
 package = os.path.dirname(module)
 project = os.path.dirname(package)
-print("Add", project)
+
+sys.path.insert(0, package)
 sys.path.insert(0, project)
-print("Add", module)
-sys.path.insert(0, module)
+#sys.path.insert(0, module)

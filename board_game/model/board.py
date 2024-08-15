@@ -1,20 +1,20 @@
 # organization is package/module/submodule
 import setup
 
-import os
 import json
 from collections import OrderedDict
 
-from board_game.model.json_encoder import CompactJSONEncoder
-from board_game.model.point import Point
-from board_game.model.path import Path
-from board_game.model.exit import Exit
-from board_game.model.space import Space
+from model.jsoninator import Jsoninator
+from model.point import Point
+from model.path import Path
+from model.exit import Exit
+from model.space import Space
 
 
 class Board():
-    def __init__(self, json_path=None, spaces=dict()):
-        self.spaces = spaces
+    def __init__(self, json_path=None, spaces=None, name=None):
+        self.name = name if name != None else ""
+        self.spaces = spaces if spaces != None else dict()
         self.last_space_id = None
         self.json_path=json_path
         if self.json_path != None:
@@ -50,84 +50,80 @@ class Board():
         sorted_spaces = OrderedDict()
         for k in sorted_keys:
             sorted_spaces[k] = self.spaces[k]
-        return {"spaces": sorted_spaces
+        return {"__type__":  "Board",
+                "name":      self.name,
+                "spaces":    sorted_spaces
                } 
     
     # Note: this is a class function
     def json_decode(json_dict):
-        if "Board" in json_dict:
-            spaces = json_dict["Board"]["spaces"]
+        board_dict = (json_dict["Board"] if ("Board" in json_dict) else
+                      json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Board")) else
+                      None)
+        if board_dict != None:
+            # print("\nGetName", type(board_dict), board_dict.keys())
+            name = board_dict.get("name", None)
+            spaces = board_dict["spaces"]
             spaces = {int(k): v for k, v in spaces.items()}
             for k, v in spaces.items():
                 if v.id < 0:
                     v.id = int(k)
-            #self.last_space_id = None
-            return Board(spaces=spaces)
+            return Board(name=name, spaces=spaces)
+        return json_dict
         
     def save_to_json_path(self, json_path=None):
-        class LocalJSONEncoder(CompactJSONEncoder):
-            def default(self, o):
-                if isinstance(o, (Board, Space, Point, Path, Exit)):  
-                    return o.json_encode()
-                return CompactJSONEncoder.default(self, o)
-        
+        jsoninator = Jsoninator({"Board": Board, "Space": Space,
+                                 "Point": Point, "Path": Path, "Exit": Exit})
         json_path = json_path if json_path != None else self.json_path
         with open(json_path, 'w') as json_file:
-                  json.dump(self, json_file, indent=2, sort_keys=False,
-                            cls=LocalJSONEncoder, ensure_ascii = False)
+            json.dump(self, json_file, indent=2, sort_keys=False,
+                      default=jsoninator.default, ensure_ascii=True)
             
     # this is a class function and constructs a new Board
     def load_from_json_path(self, json_path=None):
-        class LocalJSONDecoder(json.JSONDecoder):
-            def __init__(self, *args, **kwargs):
-                json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-            def object_hook(self, dct):
-                if 'Board' in dct:
-                    return Board.json_decode(dct)
-                if 'Point' in dct:
-                    return Point.json_decode(dct)
-                if 'Space' in dct:
-                    return Space.json_decode(dct)
-                if 'Path' in dct:
-                    return Path.json_decode(dct)
-                if 'Exit' in dct:
-                    return Exit.json_decode(dct)
-                return dct
-            
+        jsoninator = Jsoninator({"Board": Board, "Space": Space,
+                                 "Point": Point, "Path": Path, "Exit": Exit})    
+        json_path = json_path if json_path != None else self.json_path
         try:
-            json_path = json_path if json_path != None else self.json_path
             with open(json_path, 'r') as json_file:
-                json_data = json.load(json_file, cls=LocalJSONDecoder)
-            self.spaces = {int(k): v for k, v in json_data.get("spaces", {}).items()}
-            for k, v in self.spaces.items():
-                if v.id < 0:
-                    v.id = int(k)
-            self.last_space_id = None
+                json_data = json.load(json_file, object_hook=jsoninator.object_hook)
+            if isinstance(json_data, dict):
+                # print("\nBoard.load_from_json_path", json_data.keys())
+                self.spaces = {int(k): v for k, v in json_data.get("spaces", {}).items()}
+                for k, v in self.spaces.items():
+                    if v.id < 0:
+                        v.id = int(k)
+                self.last_space_id = None
+            else:
+                self.name = json_data.name
+                self.spaces = json_data.spaces
+                self.last_space_id = json_data.last_space_id
+                self.json_path = json_data.json_path if json_data.json_path != None else self.json_path
         except Exception as e:
-            print("Exception (Board.load_from_json_path)", e)
+            print("\nException (Board.load_from_json_path)", e)
             pass
 
     def from_json_path(json_path):
         return Board(json_path)
 
 
-if __name__ == "__main__":
-    here = os.path.abspath(__file__)
-    json_path = os.path.join(os.path.dirname(here), "../../data/board.json" )
+# if __name__ == "__main__":
+#     here = os.path.abspath(__file__)
+#     json_path = os.path.join(os.path.dirname(here), "../../data/board.json" )
 
-    board = Board(json_path)
-    print("CWD", os.getcwd())
-    temp_path = os.path.join(os.path.dirname(here), "temp/board.json")
-    board.save_to_json_path(temp_path)
-    board1 = Board(temp_path)
-    board2 = Board.from_json_path(temp_path)
+#     board = Board(json_path)
+#     print("CWD", os.getcwd())
+#     temp_path = os.path.join(os.path.dirname(here), "board.json")
+#     board.save_to_json_path(temp_path)
+#     board1 = Board(temp_path)
+#     board2 = Board.from_json_path(temp_path)
 
-    print(board1)
-    assert len(board1.spaces) == len(board2.spaces)
-    assert len(board1.spaces) == 419
-    assert len(board1) == 419
+#     print(board1)
+#     assert len(board1.spaces) == len(board2.spaces)
+#     assert len(board1.spaces) == 419
+#     assert len(board1) == 419
     
-    print("Find(100,100)", board1.find_space(Point(100, 100)))
-    assert board1.find_space(Point(100, 100))[0] == 333
-    print("Find(200,100)", board1.find_space(Point(200, 100)))
-    assert board1.find_space(Point(200, 100))[0] == 329
+#     print("Find(100,100)", board1.find_space(Point(100, 100)))
+#     assert board1.find_space(Point(100, 100))[0] == 333
+#     print("Find(200,100)", board1.find_space(Point(200, 100)))
+#     assert board1.find_space(Point(200, 100))[0] == 329

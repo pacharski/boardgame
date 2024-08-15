@@ -1,1 +1,0 @@
-print("BoardGame.board_game.model.test.__init__")

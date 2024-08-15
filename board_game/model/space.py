@@ -1,6 +1,6 @@
 # organization is package/module/submodule
 import setup
-from board_game.model.point import Point
+from model.point import Point
 
 from copy import deepcopy
 
@@ -44,12 +44,13 @@ class Space():
         return len(self.exits)
     
     def json_encode(self):
-        return { "Space": { "id":       self.id,
-                            "center":   None if self.center == None else list(self.center.xy),
-                            "level":    self.level if self.level != None else 0,
-                            "name":     self.name,
-                            "vertices": [list(v.xy) for v in self.vertices],
-                            "exits":    self.exits } }
+        return {"__type__": "Space",
+                "id":       self.id,
+                "center":   None if self.center == None else list(self.center.xy),
+                "level":    self.level if self.level != None else 0,
+                "name":     self.name,
+                "vertices": [list(v.xy) for v in self.vertices],
+                "exits":    self.exits}
     
     # Note: this is a class function
     def json_decode(json_dict):
