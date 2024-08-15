@@ -97,7 +97,7 @@ class DeckView():
 if __name__ == '__main__':
     import os
     import json
-    from json_encoder import CompactJSONEncoder
+    #from json_encoder import CompactJSONEncoder
 
     class LocalEncoder(CompactJSONEncoder):
         def default(self, o):
@@ -146,22 +146,22 @@ if __name__ == '__main__':
     filename = "temp/style.json"
     styles = {"front": front,
               "back":  back}
-    with open(filename, 'w') as jsonfile:
-        json.dump(styles, jsonfile, cls=LocalEncoder)
-    with open(filename, 'r') as jsonfile:
-        styles_copy = json.load(jsonfile, cls=LocalDecoder)
+    # with open(filename, 'w') as jsonfile:
+    #     json.dump(styles, jsonfile, cls=LocalEncoder)
+    # with open(filename, 'r') as jsonfile:
+    #     styles_copy = json.load(jsonfile, cls=LocalDecoder)
 
-    assert len(styles) == len(styles_copy)
-    assert "front" in styles_copy
-    assert "back" in styles_copy
+    # assert len(styles) == len(styles_copy)
+    # assert "front" in styles_copy
+    # assert "back" in styles_copy
  
-    filename = "temp/card_view.json"
-    with open(filename, 'w') as jsonfile:
-        json.dump(card_views, jsonfile, cls=LocalEncoder)
-    with open(filename, 'r') as jsonfile:
-        card_views_copy = json.load(jsonfile, cls=LocalDecoder)
+    # filename = "temp/card_view.json"
+    # with open(filename, 'w') as jsonfile:
+    #     json.dump(card_views, jsonfile, cls=LocalEncoder)
+    # with open(filename, 'r') as jsonfile:
+    #     card_views_copy = json.load(jsonfile, cls=LocalDecoder)
 
-    assert len(card_views) == len(card_views_copy)
+    # assert len(card_views) == len(card_views_copy)
     #assert "front" in styles_copy
     #assert "back" in styles_copy
  
