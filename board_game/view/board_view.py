@@ -212,7 +212,6 @@ if __name__ == "__main__":
     frame = tkinter.Frame( root )
     frame.pack( fill=tkinter.BOTH, expand=tkinter.YES )
     
-    # image_name = "dungeon/BoardView_cropped.png"
     image_path = os.path.join(os.path.dirname(here), "../../data/board.png")
     canvas = BoardView( frame, board, image_path, (400, 300),
                          bg="white", highlightthickness=0 ) 

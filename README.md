@@ -15,3 +15,6 @@ edit_spaces:
   then press enter to save the space
 
   ctrl-s will save the board data as a json file
+
+To run tests for board_game model, from the board_game directory:
+python model/test

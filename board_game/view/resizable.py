@@ -187,7 +187,6 @@ if __name__ == "__main__":
     frame = tkinter.Frame(root)
     frame.pack(fill=tkinter.BOTH, expand=tkinter.YES)
     
-    # image_name = "dungeon/board_cropped.png"
     canvas = ResizableImage(frame, image_path, width=400, height=300,
                             bg="white", highlightthickness=0)
          
