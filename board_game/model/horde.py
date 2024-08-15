@@ -24,10 +24,33 @@ class Creature():
     def __mul__(self, n):
         return [self for _ in range(n)]
     
+    def json_encode(self):
+        return {"__type__": "Creature",
+                "level":    self.level,
+                "defenses": self.defenses,
+                "ability":  self.ability,
+                "desc":     self.desc}
+                
+    # Note: this is a class function, suitable to use for json load object_hook
+    def json_decode(json_dict):
+        local_dict = (json_dict["Creature"] if "Creature" in json_dict else
+                      json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Creature")) else
+                      None)
+        if local_dict != None:
+            level       = local_dict["level"]
+            defenses    = tuple(local_dict["defenses"])
+            ability     = local_dict["ability"]
+            desc        = local_dict["desc"]
+            return Creature(level, defenses, ability, desc)
+        return json_dict
 
+    
 class Horde():
-    def __init__(self, csv_path=None):
-        self.creatures = []
+    # the default value is used for ALL instances, so default creatures to None and
+    #  assign to empty list inside __init__ if None
+    def __init__(self, csv_path=None, name=None, creatures=None):
+        self.name = name if name != None else ""
+        self.creatures = creatures if creatures != None else []
         if csv_path != None:
             self.load_from_csv_path(csv_path)
 
@@ -57,8 +80,8 @@ class Horde():
         return Horde(csv_path)
 
     def __str__(self):
-        form = "Horde: size={}"
-        return form.format(len(self))
+        form = "Horde: {} size={}"
+        return form.format(self.name, len(self))
     
     def __len__(self):
         return len(self.creatures)
@@ -67,16 +90,18 @@ class Horde():
         for creature in self.creatures:
             yield creature
 
-
-if __name__ == '__main__':
-    import os
-    
-    here = os.path.abspath(__file__)
-    csv_path = os.path.join(os.path.dirname(here), "../../data/creatures.csv")
-    horde1 = Horde(csv_path)
-    horde2 = Horde.from_csv_path(csv_path)
-    assert len(horde1) == len(horde2)
-    assert len(horde1) == 61
-
-    for creature in horde1:
-        print(creature)
+    def json_encode(self):
+        return {"__type__": "Horde",
+                "name":       self.name,
+                "creatures":  self.creatures}
+                
+    # Note: this is a class function, suitable to use for json load object_hook
+    def json_decode(json_dict):
+        local_dict = (json_dict["Horde"] if "Horde" in json_dict else
+                      json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Horde")) else
+                      None)
+        if local_dict != None:
+            name      = local_dict["name"]
+            creatures = local_dict["creatures"]
+            return Horde(name=name, creatures=creatures)
+        return json_dict 
