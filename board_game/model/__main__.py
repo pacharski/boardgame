@@ -1,7 +1,4 @@
-# To run unit tests from boardgame directory, Run with:
-#     'python board_game'
-
-print("Run boardgame unittests")
+print("Run boardgame.model unittests")
 
 import unittest
 import os
