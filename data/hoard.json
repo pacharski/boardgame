@@ -1,0 +1,566 @@
+{
+  "__type__": "Hoard",
+  "name": "",
+  "treasures": [
+    {
+      "__type__": "Treasure",
+      "ability": "Damage+(1-2)",
+      "desc": "Magic Sword",
+      "level": 1,
+      "value": 500
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Sack of Gold",
+      "level": 1,
+      "value": 250
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Sack of Gold",
+      "level": 1,
+      "value": 250
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Sack of Gold",
+      "level": 1,
+      "value": 500
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Sack of Gold",
+      "level": 1,
+      "value": 500
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Sack of Gold",
+      "level": 1,
+      "value": 750
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Sack of Gold",
+      "level": 1,
+      "value": 750
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Sack of Gold",
+      "level": 1,
+      "value": 1000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "SecretDoor",
+      "desc": "Secret Door Card",
+      "level": 1,
+      "value": 0
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "Damage+(1-2)",
+      "desc": "Magic Sword",
+      "level": 2,
+      "value": 1000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Sack of Gold",
+      "level": 2,
+      "value": 500
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Sack of Gold",
+      "level": 2,
+      "value": 750
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Sack of Gold",
+      "level": 2,
+      "value": 1000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Sack of Gold",
+      "level": 2,
+      "value": 1000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "SecretDoor",
+      "desc": "Secret Door Card",
+      "level": 2,
+      "value": 0
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Cup",
+      "level": 2,
+      "value": 1000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Cup",
+      "level": 2,
+      "value": 1000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Ring",
+      "level": 2,
+      "value": 2000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "EsP",
+      "desc": "ESP Medallion",
+      "level": 3,
+      "value": 500
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Gold Cup",
+      "level": 3,
+      "value": 2500
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Gold Cup",
+      "level": 3,
+      "value": 2500
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Gold Cup",
+      "level": 3,
+      "value": 2500
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Gold Ring",
+      "level": 3,
+      "value": 3000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Gold Ring",
+      "level": 3,
+      "value": 3000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Sack of Gold",
+      "level": 3,
+      "value": 750
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Sack of Gold",
+      "level": 3,
+      "value": 1000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Sack of Gold",
+      "level": 3,
+      "value": 1000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "SecretDoor",
+      "desc": "Secret Door Card",
+      "level": 3,
+      "value": 0
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Cup",
+      "level": 3,
+      "value": 1000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Cup",
+      "level": 3,
+      "value": 1000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Cup",
+      "level": 3,
+      "value": 1000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Ring",
+      "level": 3,
+      "value": 2000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Ring",
+      "level": 3,
+      "value": 2000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Ring",
+      "level": 3,
+      "value": 2000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "Damage+(1-2)",
+      "desc": "Magic Sword",
+      "level": 4,
+      "value": 1000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "Damage+(1-2)",
+      "desc": "Magic Sword",
+      "level": 4,
+      "value": 1000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "CrystalBall",
+      "desc": "Crystal Ball",
+      "level": 4,
+      "value": 0
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Gold Cup",
+      "level": 4,
+      "value": 2500
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Gold Cup",
+      "level": 4,
+      "value": 2500
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Gold Ring",
+      "level": 4,
+      "value": 3000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Gold Ring",
+      "level": 4,
+      "value": 3000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Huge Emerald",
+      "level": 4,
+      "value": 5000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Huge Sapphire",
+      "level": 4,
+      "value": 6000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Jade Idol",
+      "level": 4,
+      "value": 5000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Jade Idol",
+      "level": 4,
+      "value": 5000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Sack of Gold",
+      "level": 4,
+      "value": 1000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Secret Door Card",
+      "level": 4,
+      "value": 0
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Coffer",
+      "level": 4,
+      "value": 4000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Coffer",
+      "level": 4,
+      "value": 4000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Cup",
+      "level": 4,
+      "value": 1000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Ring",
+      "level": 4,
+      "value": 2000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Ring",
+      "level": 4,
+      "value": 2000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "ESP Medallion",
+      "level": 5,
+      "value": 1500
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Gold Cup",
+      "level": 5,
+      "value": 2500
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Gold Cup",
+      "level": 5,
+      "value": 2500
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Gold Ring",
+      "level": 5,
+      "value": 3000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Gold Ring",
+      "level": 5,
+      "value": 3000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Huge Emerald",
+      "level": 5,
+      "value": 5000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Huge Emerald",
+      "level": 5,
+      "value": 5000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Huge Ruby",
+      "level": 5,
+      "value": 8000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Huge Sapphire",
+      "level": 5,
+      "value": 6000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Huge Sapphire",
+      "level": 5,
+      "value": 6000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Jade Idol",
+      "level": 5,
+      "value": 5000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Jade Idol",
+      "level": 5,
+      "value": 5000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Coffer",
+      "level": 5,
+      "value": 4000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Coffer",
+      "level": 5,
+      "value": 4000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Necklace",
+      "level": 5,
+      "value": 7000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Ring",
+      "level": 5,
+      "value": 2000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Magic Sword",
+      "level": 6,
+      "value": 2000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "CrystalBall",
+      "desc": "Crystal Ball",
+      "level": 6,
+      "value": 2000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Gold Necklace",
+      "level": 6,
+      "value": 9000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Huge Diamond",
+      "level": 6,
+      "value": 10000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Huge Emerald",
+      "level": 6,
+      "value": 5000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Huge Emerald",
+      "level": 6,
+      "value": 5000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Huge Ruby",
+      "level": 6,
+      "value": 8000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Huge Sapphire",
+      "level": 6,
+      "value": 6000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Jade Idol",
+      "level": 6,
+      "value": 5000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Jade Idol",
+      "level": 6,
+      "value": 5000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Coffer",
+      "level": 6,
+      "value": 4000
+    },
+    {
+      "__type__": "Treasure",
+      "ability": "-",
+      "desc": "Silver Necklace",
+      "level": 6,
+      "value": 7000
+    }
+  ]
+}
