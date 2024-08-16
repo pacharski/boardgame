@@ -1,8 +1,12 @@
+# organization is project/package/module/submodule
+from pathlib import Path
+print('Running' if __name__ == '__main__' else
+      'Importing', Path(__file__).resolve())
+
 import unittest
 
 import json
 
-import setup
 from model.jsoninator import Jsoninator
 from model.space import Space
 from model.point import Point
