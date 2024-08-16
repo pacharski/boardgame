@@ -1,7 +1,10 @@
-# organization is package/module/submodule
-import setup
+# organization is project/package/module/submodule
+from pathlib import Path
+print('Running' if __name__ == '__main__' else
+      'Importing', Path(__file__).resolve())
 
 from copy import deepcopy
+
 
 class Exit():
     cBarriers = ["", "Door", "Secret Door"]

@@ -1,14 +1,32 @@
-# organization is package/module/submodule
-import setup
+# organization is project/package/module/submodule
+from pathlib import Path
+print('Running' if __name__ == '__main__' else
+      'Importing', Path(__file__).resolve())
 
 import json
 from collections import OrderedDict
 
-from model.jsoninator import Jsoninator
-from model.point import Point
-from model.path import Path
-from model.exit import Exit
-from model.space import Space
+#import sys
+#print("SysPath2:", "\n\t".join([""] + [str(p) for p in sys.path]))
+
+# allows running board.py directly 
+# can this also be done in the if name is main ?
+try:
+    from model.jsoninator import Jsoninator #from model import Jsoninator
+    from model.point import Point
+    from model.path import Path
+    from model.exit import Exit
+    from model.space import Space
+except Exception:
+    pass
+try:
+    from jsoninator import Jsoninator #from model import Jsoninator
+    from point import Point
+    from path import Path
+    from exit import Exit
+    from space import Space
+except Exception:
+    pass
 
 
 class Board():

@@ -1,5 +1,7 @@
-# organization is package/module/submodule
-import setup
+# organization is project/package/module/submodule
+from pathlib import Path
+print('Running' if __name__ == '__main__' else
+      'Importing', Path(__file__).resolve())
 
 from enum import IntEnum
 
@@ -61,3 +63,7 @@ class Path():
                         forward=int(forward),
                         backward=int(backward)
                        )
+        
+    
+if __name__ == "__main__":
+    print(Path())

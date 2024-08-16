@@ -1,5 +1,9 @@
-# organization is package/module/submodule
-import setup
+# organization is project/package/module/submodule
+# dimport setup
+
+from pathlib import Path
+print('Running' if __name__ == '__main__' else
+      'Importing', Path(__file__).resolve())
 
 from model.marker import Marker
 

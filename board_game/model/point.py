@@ -1,5 +1,9 @@
-# organization is package/module/submodule
-import setup
+# organization is project/package/module/submodule
+# dimport setup
+
+from pathlib import Path
+print('Running' if __name__ == '__main__' else
+      'Importing', Path(__file__).resolve())
 
 from copy import deepcopy
 
@@ -36,3 +40,7 @@ class Point():
             xy = json_dict["xy"]
             return Point(x=int(xy[0]), y=int(xy[1]))
         return json_dict
+    
+
+if __name__ == "__main__":
+    print(Point())

@@ -1,6 +1,17 @@
-# organization is package/module/submodule
-import setup
-from model.point import Point
+# organization is project/package/module/submodule
+from pathlib import Path
+print('Running' if __name__ == '__main__' else
+      'Importing', Path(__file__).resolve())
+
+# try to different imports so this can be run directly for testing
+try:
+    from model.point import Point
+except Exception as e:
+    pass #print("Could Not import from 'model.point'", e)
+try:
+    from point import Point
+except Exception:
+    pass #print("Could not import from point")
 
 from copy import deepcopy
 
@@ -80,3 +91,7 @@ class Space():
                            exits=self.num_exits, 
                            sides=self.num_vertices 
                           )
+
+
+if __name__ == "__main__":
+    print(Space())
