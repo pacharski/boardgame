@@ -3,45 +3,52 @@ from pathlib import Path
 print('Running' if __name__ == '__main__' else
       'Importing', Path(__file__).resolve())
 
+import os
 from enum import IntEnum
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
-
-from view.board_view import BoardView
-from model.board import Board
-from model.point import Point
-from model.space import Space
-from model.path import Path
-from model.exit import Exit
+import board_game as bg
+import tkinter
 
 
-class BoardEdit( BoardView ):
+class BoardEditor( bg.BoardView ):
     class Mode( IntEnum ):
         cReadOnly      = 0
         cEditSpaces    = 1
         cEditExits     = 2
         cMax           = 3
 
-    def __init__(self, parent, json_path, image_path, size, **kwargs):
-        self.json_path = json_path
-        self.board = Board.from_json_path(self.json_path)
-        super().__init__(parent, self.board, image_path, size, **kwargs)
+    def __init__(self, name, data_path):
+        self.name = name
+        self.data_path = data_path
+        board = bg.Board.from_json_path(self.json_path)
         
-        self.space = Space()
-        self.path = Path()
-        self.text = ""
+        self.root = tkinter.Tk()
+        self.root.title( "cReadOnly" )
+        frame = tkinter.Frame( self.root )
+        frame.pack( fill=tkinter.BOTH, expand=tkinter.YES )
+        super().__init__(frame, board, self.image_path, (400, 300),
+                         bg="white", highlightthickness=0 ) 
+        self.focus_set() 
+
+        self.space = bg.Space()            # actively defining a new space
+        self.connection = bg.Connection()  # actively defining a new connection
+        self.text = ""                    # text entered while defining space or connection
         
-        self.mode = BoardEdit.Mode.cReadOnly
+        self.mode = BoardEditor.Mode.cReadOnly
         self.set_overlay("ReadOnly")
         
+        self.bind_mouse()
+        self.bind_keys()
+
+    def bind_mouse(self):
         # Left click to mark points when in edit mode
         self.bind("<Button-1>", self.on_mouse_left)
         # Ignore mouse move events when in edit mode
         self.bind("<B1-Motion>", self.on_mouse_move_left)
         # double click to toggle edit mode
         # self.bind("<Double-ButtonPress-1>", self.on_mouse_double_left)  
+        
+    def bind_keys(self):    
         # esc to abort define space
         # enter to end define space
         # ctrl-z undo last mark
@@ -57,38 +64,49 @@ class BoardEdit( BoardView ):
         self.bind("<KeyPress-Escape>", self.on_key_press_escape)
         self.bind("<KeyPress>", self.on_key_press)
         self.bind("<FocusIn>", self.on_focus_in)
-        self.bind("<FocusOut>", self.on_focus_out) 
+        self.bind("<FocusOut>", self.on_focus_out)    
+    
+    def run(self):
+        tkinter.mainloop()
 
     @property
+    def json_path(self):
+        return os.path.join(self.data_path, self.name + ".json")
+
+    @property
+    def image_path(self):
+        return os.path.join(self.data_path, self.name + ".png")
+    
+    @property
     def read_only(self):
-        return self.mode == BoardEdit.Mode.cReadOnly
+        return self.mode == BoardEditor.Mode.cReadOnly
 
     @property
     def edit_spaces(self):
-        return self.mode == BoardEdit.Mode.cEditSpaces
+        return self.mode == BoardEditor.Mode.cEditSpaces
     
     @property
     def edit_exits(self):
-        return self.mode == BoardEdit.Mode.cEditExits
+        return self.mode == BoardEditor.Mode.cEditExits
  
     def resize(self):
         super().resize()
 
-    def path_valid(self):
-        return self.path.origin != None
+    def connection_valid(self):
+        return self.connection.origin != None
     
-    def space_id_in_path(self, space_id):
-        return (self.path_valid()
-            and ((space_id == self.path.origin)
-              or (space_id == self.path.terminus)))
+    def space_id_in_connection(self, space_id):
+        return (self.connection_valid()
+            and ((space_id == self.connection.origin)
+              or (space_id == self.connection.terminus)))
     
     def center_color(self, id, level):
-        return ("black" if self.space_id_in_path(id) else
+        return ("black" if self.space_id_in_connection(id) else
                 super().center_color(id, level) 
                )
                
     def id_color(self, id, level):
-        return ("white" if self.space_id_in_path(id) else
+        return ("white" if self.space_id_in_connection(id) else
                 super().id_color(id, level)
                )
                             
@@ -138,45 +156,45 @@ class BoardEdit( BoardView ):
         x, y = self.view_port.map_to_domain(xy, (0, 0, self.width, self.height))
         if self.space.center != None:
             #near, xy = self.find_point( xy )
-            self.space.add_vertex(Point(x=x, y=y))
+            self.space.add_vertex(bg.Point(x=x, y=y))
         else:
             # print("SetCenter", xy)
-            self.space.center = Point(x=x, y=y)
+            self.space.center = bg.Point(x=x, y=y)
         self.resize()
         
     def unmark_space(self):
         self.space.remove_last_vertex()
 
-    def mark_path(self, point):
+    def mark_connection(self, point):
         self.focus_set()
         x, y = self.view_port.map_to_domain(point.xy, (0, 0, self.width, self.height))
-        id, _ = self.board.find_space(Point(x, y))
-        if (self.path.origin == None) or (id == self.path.origin):
-            self.path.origin = id
+        id, _ = self.board.find_space(bg.Point(x, y))
+        if (self.connection.origin == None) or (id == self.connection.origin):
+            self.connection.origin = id
         else:
-            self.path.terminus = id
-        # redraw to show path in progress
+            self.connection.terminus = id
+        # redraw to show connection in progress
         self.resize()
         
-    def unmark_path(self):
-        if self.path.origin != None:
-            if self.path.terminus != None:
-                self.path.terminus = None
+    def unmark_connection(self):
+        if self.connection.origin != None:
+            if self.connection.terminus != None:
+                self.connection.terminus = None
             else:
-                self.path.origin = None
+                self.connection.origin = None
         
     def rotate_mode(self):
-        if self.mode == BoardEdit.Mode.cReadOnly:
-            self.mode = BoardEdit.Mode.cEditSpaces
+        if self.mode == BoardEditor.Mode.cReadOnly:
+            self.mode = BoardEditor.Mode.cEditSpaces
             self.set_overlay("EditSpaces")
-        elif self.mode == BoardEdit.Mode.cEditSpaces:
-            self.mode = BoardEdit.Mode.cEditExits
+        elif self.mode == BoardEditor.Mode.cEditSpaces:
+            self.mode = BoardEditor.Mode.cEditExits
             self.set_overlay("EditExits")
         else:
-            self.mode = BoardEdit.Mode.cReadOnly
+            self.mode = BoardEditor.Mode.cReadOnly
             self.set_overlay("ReadOnly")
         self.abandon_space()
-        self.abandon_path()
+        self.abandon_connection()
         
     def save_space(self, text=""):
         if self.space.center != None:
@@ -184,9 +202,9 @@ class BoardEdit( BoardView ):
             level = int(parts[0]) if (len(parts) > 0) and (len(parts[0]) > 0) else 0
             name  = parts[1] if len(parts) > 1 else ""
             self.board.add_space(
-                Space(name=name, level=level, center=self.space.center,
-                      vertices=[Point(x=v.x, y=v.y) for v in self.space.vertices],
-                      exits=[])
+                bg.Space(name=name, level=level, center=self.space.center,
+                         vertices=[bg.Point(x=v.x, y=v.y) for v in self.space.vertices],
+                         exits=[])
             )
             self.space.reset()
             self.resize()
@@ -203,22 +221,22 @@ class BoardEdit( BoardView ):
                 "Door" if barrier in "dD" else
                 "")
             
-    def save_path(self, text=""):
-        if ((self.path.origin != None) 
-        and (self.path.terminus != None)):
+    def save_connection(self, text=""):
+        if ((self.connection.origin != None) 
+        and (self.connection.terminus != None)):
             forward = self.decode_barrier(text, 0)
             backward = self.decode_barrier(text, 1)
-            self.board.spaces[self.path.origin].add_exit(
-                Exit(destination=self.path.terminus, barrier=forward)
+            self.board.spaces[self.connection.origin].add_exit(
+                bg.Exit(destination=self.connection.terminus, barrier=forward)
             )
-            self.board.spaces[self.path.terminus].add_exit(
-                Exit(destination=self.path.origin, barrier=backward)
+            self.board.spaces[self.connection.terminus].add_exit(
+                bg.Exit(destination=self.connection.origin, barrier=backward)
             )
-        self.path.reset()
+        self.connection.reset()
         self.resize()
 
-    def abandon_path(self):
-        self.path.reset()
+    def abandon_connection(self):
+        self.connection.reset()
         self.resize()
 
     def save_to_file(self):
@@ -229,10 +247,10 @@ class BoardEdit( BoardView ):
         self.focus_set()
         if self.edit_spaces:  
             self.zooming = False
-            self.mark_space(Point(x=event.x, y=event.y))
+            self.mark_space(bg.Point(x=event.x, y=event.y))
         elif self.edit_exits: 
             self.zooming = False
-            self.mark_path(Point(x=event.x, y=event.y))
+            self.mark_connection(bg.Point(x=event.x, y=event.y))
         else:
             super().on_mouse_left( event )
         
@@ -244,7 +262,7 @@ class BoardEdit( BoardView ):
     
     def on_mouse_double_left( self, event ):
         self.abandon_space()
-        self.abandon_path()
+        self.abandon_connection()
         self.focus_set()
         self.rotate_mode()
         
@@ -254,37 +272,37 @@ class BoardEdit( BoardView ):
             self.space.reset()
             self.text = ""
         elif self.edit_exits:
-            self.save_path(self.text)
-            self.path.reset()
+            self.save_connection(self.text)
+            self.connection.reset()
             self.text = ""
 
     def on_key_press_escape(self, event):
         if self.edit_spaces:
             self.abandon_space()
         elif self.edit_exits:
-            self.abandon_path()
+            self.abandon_connection()
         self.text = ""
 
     def on_focus_in(self, event):
         self.abandon_space()
-        self.abandon_path()
+        self.abandon_connection()
         print("focus:in")
 
     def on_focus_out(self, event):
         print("focus:out")
         self.abandon_space()
-        self.abandon_path()
+        self.abandon_connection()
 
     def on_key_press_ctrl_z(self, event):
         self.unmark_space()
-        self.unmark_path()
+        self.unmark_connection()
 
     def on_key_press_ctrl_s(self, event):
         self.save_to_file()
 
     def on_key_press_ctrl_m(self, event):
         self.abandon_space()
-        self.abandon_path()
+        self.abandon_connection()
         self.rotate_mode()
         
     def on_key_press(self, event):
@@ -297,21 +315,26 @@ class BoardEdit( BoardView ):
 
 
 if __name__ == "__main__":
-    import os
-    import tkinter
+    here = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(here, "data")
+    bv = BoardEditor("board", data_path)
+    bv.run()
+
+    # import os
+    # import tkinter
     
-    here = os.path.abspath(__file__)
-    image_path = os.path.join(os.path.dirname(here), "../../data/board.png")
-    json_path = os.path.join(os.path.dirname(here), "../../data/board.json" )
+    # here = os.path.abspath(__file__)
+    # image_path = os.path.join(os.path.dirname(here), "../../data/board.png")
+    # json_path = os.path.join(os.path.dirname(here), "../../data/board.json" )
  
-    root = tkinter.Tk()
-    root.title( "cReadOnly" )
-    frame = tkinter.Frame( root )
-    frame.pack( fill=tkinter.BOTH, expand=tkinter.YES )
+    # root = tkinter.Tk()
+    # root.title( "cReadOnly" )
+    # frame = tkinter.Frame( root )
+    # frame.pack( fill=tkinter.BOTH, expand=tkinter.YES )
     
-    canvas = BoardEdit( frame, json_path, image_path, (400, 300),
-                        bg="white", highlightthickness=0 ) 
+    # canvas = BoardEdit( frame, json_path, image_path, (400, 300),
+    #                     bg="white", highlightthickness=0 ) 
         
-    canvas.focus_set()    
-    tkinter.mainloop()
+    # canvas.focus_set()    
+    # tkinter.mainloop()
 
