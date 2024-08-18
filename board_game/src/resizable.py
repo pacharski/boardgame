@@ -2,9 +2,97 @@
 from PIL import Image, ImageTk
 import tkinter
 
+class LayoutBbox():
+    def __init__(self, bbox):
+        """bbox is defined in mils of the overall layout"""
+        self.bbox = bbox
+    
+    def scale_to_bbox(self, bbox):
+        left, upper, right, lower = bbox
+        width = right - left
+        height = lower - upper
+        s_left, s_upper, s_right, s_lower = self.scale_to_width_and_height(width, height)
+        return (left + s_left, upper + s_upper, left + s_right, upper + s_lower)
+
+    def scale_to_width_and_height(self, width, height):
+        """No negative numbers, so use int() instead of math.floor()"""
+        return (int((height * self.left)  / 1000),
+                int((width  * self.upper) / 1000),
+                int((height * self.lower) / 1000), 
+                int((width  * self.right) / 1000))
+        
+
+class LayoutBlock():
+    def __init__(self, name, item, layout_bbox: LayoutBbox):
+        """bbox is defined in mils of the overall layout"""
+        self.name = name
+        self.item = item
+        self.layout_bbox = layout_bbox
+    
+    def scale_to_bbox(self, bbox):
+        return self.layout_bbox.scale_to_bbox(bbox)
+        
+    def scale_to_width_and_height(self, width, height):
+        return self.layout_bbox.scale_to_width_and_height(width, height)
+    
+
+class LayoutProportional():
+    """Simple layout manager that manages a set of blocks and scales everything proportionally"""
+    def __init__(self, blocks=None):
+        self.blocks = dict() if blocks == None else blocks
+        
+    def scale_to_bbox(self, bbox):
+        """Scale everything and return a dict of tuple.
+           Should not need to snap because the edges should calculate the 
+            same scaled value given the same input value
+        """
+        return {key: (block.name, block.item, block.scale_to_bbox(bbox)) 
+                for key, block in self.blocks.items()}
+    
+    def scale_to_width_and_height(self, width, height):
+        """Scale everything, and return as a dict of tuple.
+           Should not need to snap because the edges should calculate the 
+            same scaled value given the same input value
+        """
+        return {key: (block.name, block.item, block.scale_to_width_and_height(width, height)) 
+                for key, block in self.blocks.items()}
+    
+
+class ProportionalFrame(Frame):
+    def __init__(self, parent, layout=None, **kwargs):
+        super().__init__(parent, **kwargs)
+        self.bind("<Configure>", self.on_resize)
+        self.width = self.winfo_reqwidth()
+        self.height = self.winfo_reqheight()
+        self._layout = layout
+        
+    # layout is private with setter/getter so an action can be taken on set
+    @property
+    def layout(self):
+        return self._layout
+    
+    @layout.setter
+    def layout(self, value):
+        """Set the layout and redraw?"""
+        self._layout = value if value != None else LayoutProportional()
+
+    @layout.deleter
+    def layout(self):
+        del self._layout
+
+    def resize(self):
+        scaled_layout = self.layout.scale_to_width_and_height(self.width, self.height)
+        
+    def on_resize(self, event):
+        """Redraw everything scaled to the new hight and width"""
+        #super().on_resize(event)
+        self.width = event.width
+        self.height = event.height
+        self.resize()
+
 
 class ViewPort():
-    def __init__( self, domain ):
+    def __init__(self, domain):
         self.domain = domain # width,height of thing being viewed
         self.scale = 10 # 10=1x, 20=2x, etc.  5=1/2x
         self.focus = ( int( self.domain[0] / 2 ), int( self.domain[1] / 2 ) )
@@ -180,15 +268,22 @@ if __name__ == "__main__":
     import os
     
     here = os.path.abspath(__file__)
-    image_path = os.path.join(os.path.dirname(here), "../data/board.png")
+    image_path = os.path.join(os.path.dirname(here), "../../data/board.png")
  
     root = tkinter.Tk()
-    root.title("ResizableImage")
-    frame = tkinter.Frame(root)
-    frame.pack(fill=tkinter.BOTH, expand=tkinter.YES)
-    
-    canvas = ResizableImage(frame, image_path, width=400, height=300,
-                            bg="white", highlightthickness=0)
-         
+    root.title("ProportionalCanvas")
+    root.geometry("800x600+0+0")
+
+    root_frame = tkinter.Frame(root)
+    root_frame.pack(fill=tkinter.BOTH, expand=tkinter.YES)
+
+    prop_canvas = ProportionalCanvas(root_frame, width=800, height=600)
+    prop_canvas.pack(fill=tkinter.BOTH, expand=tkinter.YES)
+
+    board_canvas = ResizableImage(prop_canvas, image_path, width=400, height=300,
+                                  bg="white", highlightthickness=0)
+    layout = LayoutProportional({"Board": LayoutBlock("Board", board_canvas, (200, 150, 600, 30))})
+    prop_canvas.layout = layout     
+
     tkinter.mainloop()
 
