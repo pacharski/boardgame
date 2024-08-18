@@ -4,6 +4,8 @@ print('Running' if __name__ == '__main__' else
       'Importing', Path(__file__).resolve())
 
 import csv
+import json
+import board_game as bg
 
 
 class Treasure():
@@ -42,11 +44,13 @@ class Treasure():
     
 
 class Hoard():
-    def __init__(self, csv_path=None, name=None, treasures=None):
+    def __init__(self, csv_path=None, json_path=None, name=None, treasures=None):
         self.name = name if name != None else ""
         self.treasures = treasures if treasures != None else []
         if csv_path != None:
             self.load_from_csv_path(csv_path)
+        elif json_path != None:
+            self.load_from_json_path(json_path)
 
     def load_from_csv_path(self, csv_path):
         with open(csv_path, newline='') as csv_file:
@@ -55,16 +59,17 @@ class Hoard():
                 if len(row) != 5:
                     print("SkipTreasure(#)", len(row), row)
                     count = 0
-                level, count, value, ability, desc = row
-                try:
-                    level = int(level)
-                    count = int(count)
-                    value = int(value)
-                    ability = ability.strip()
-                    desc = desc.strip()
-                except:
-                    #print("SkipTreasure(int)", len(row), row)
-                    count = 0
+                else:
+                    level, count, value, ability, desc = row
+                    try:
+                        level = int(level)
+                        count = int(count)
+                        value = int(value)
+                        ability = ability.strip()
+                        desc = desc.strip()
+                    except:
+                        #print("SkipTreasure(int)", len(row), row)
+                        count = 0
                 for _ in range(count):
                     treasure = Treasure(level, value, ability, desc)
                     self.treasures.append(treasure)
@@ -98,3 +103,19 @@ class Hoard():
             treasures = local_dict["treasures"]
             return Hoard(name=name, treasures=treasures)
         return json_dict
+    
+    def save_to_json_path(self, json_path=None):
+        jsoninator = bg.Jsoninator({"Hoard": Hoard, "Treasure": Treasure})
+        with open(json_path, 'w') as json_file:
+            json.dump(self, json_file, indent=2, sort_keys=False,
+                      default=jsoninator.default, ensure_ascii=True)
+    
+    def load_from_json_path(self, json_path):
+        jsoninator = bg.Jsoninator({"Hoard": bg.Hoard, "Treasure": bg.Treasure})
+        with open(json_path, newline='') as json_file:
+            json_data = json.load(json_file, object_hook=jsoninator.object_hook)
+            self.name = json_data.name
+            self.treasures = json_data.treasures
+
+    def from_json_path(json_path):
+        return Hoard(json_path=json_path)

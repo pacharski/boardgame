@@ -52,11 +52,13 @@ class Creature():
 class Horde():
     # the default value is used for ALL instances, so default creatures to None and
     #  assign to empty list inside __init__ if None
-    def __init__(self, csv_path=None, name=None, creatures=None):
+    def __init__(self, csv_path=None, json_path=None, name=None, creatures=None):
         self.name = name if name != None else ""
         self.creatures = creatures if creatures != None else []
         if csv_path != None:
             self.load_from_csv_path(csv_path)
+        elif json_path != None:
+            self.load_from_json_path(json_path)
 
     def load_from_csv_path(self, csv_path):
         with open(csv_path, newline='') as csv_file:
@@ -65,17 +67,18 @@ class Horde():
                 if len(row) != 10:
                     print("SkipCreature(#)", len(row), row)
                     count = 0
-                level, count, h, f, w, s, h, e, ability, desc = row
-                try:
-                    level = int(level)
-                    count = int(count)
-                    defenses = (h.strip(), f.strip(), w.strip(),
-                                s.strip(), h.strip(), e.strip())
-                    ability = ability.strip()
-                    desc = desc.strip()
-                except:
-                    # print("SkipCreature(value)", len(row), row)
-                    count = 0
+                else:
+                    level, count, h, f, w, s, h, e, ability, desc = row
+                    try:
+                        level = int(level)
+                        count = int(count)
+                        defenses = (h.strip(), f.strip(), w.strip(),
+                                    s.strip(), h.strip(), e.strip())
+                        ability = ability.strip()
+                        desc = desc.strip()
+                    except:
+                        # print("SkipCreature(value)", len(row), row)
+                        count = 0
                 for _ in range(count):
                     creature = Creature(level, defenses, ability, desc)
                     self.creatures.append(creature)
@@ -109,3 +112,19 @@ class Horde():
             creatures = local_dict["creatures"]
             return Horde(name=name, creatures=creatures)
         return json_dict 
+    
+    def save_to_json_path(self, json_path):
+        jsoninator = bg.Jsoninator({"Horde": Horde, "Creature": Creature})
+        with open(json_path, 'w') as json_file:
+            json.dump(self, json_file, indent=2, sort_keys=False,
+                      default=jsoninator.default, ensure_ascii=True)
+    
+    def load_from_json_path(self, json_path):
+        jsoninator = bg.Jsoninator({"Horde": bg.Horde, "Creature": bg.Creature})
+        with open(json_path, newline='') as json_file:
+            json_data = json.load(json_file, object_hook=jsoninator.object_hook)
+            self.name = json_data.name
+            self.creatures = json_data.creatures
+
+    def from_json_path(json_path):
+        return Horde(json_path=json_path)

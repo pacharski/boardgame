@@ -55,7 +55,20 @@ class HordeTestCase(unittest.TestCase):
     def setUp(self):
         here = os.path.dirname(os.path.abspath(__file__))
         self.csv_path = os.path.join(os.path.dirname(here), "../data/creatures.csv")
+        self.json_path = os.path.join(os.path.dirname(here), "../data/creatures.json")
         
+    def test_horde_construct_default(self):
+        horde = bg.Horde()
+        self.assertEqual((horde.name, len(horde.creatures)),
+                          ("", 0),
+                          "Default Horde has no name and zero creatures")
+    
+    def test_horde_construct_name(self):
+        horde = bg.Horde(name="Horde1")
+        self.assertEqual((horde.name, len(horde.creatures)),
+                          ("Horde1", 0),
+                          "Horde constructor set name")
+    
     def test_horde_csv(self):
         horde1 = bg.Horde(self.csv_path)
         self.assertEqual(len(horde1), 61,
@@ -67,7 +80,7 @@ class HordeTestCase(unittest.TestCase):
         self.assertEqual(len(horde3), 61,
                          "Horde3 from_csv_path has 61 creatures")
         
-    def test_horde_json(self):
+    def test_horde_json_str(self):
         horde1 = bg.Horde(self.csv_path)
         horde2 = bg.Horde()
         horde3 = bg.Horde.from_csv_path(self.csv_path)
@@ -92,4 +105,24 @@ class HordeTestCase(unittest.TestCase):
                                  "Creature ability match after json dumps/loads")
                 self.assertEqual(creature.desc, creature_copy.desc,
                                  "Creature desc match after json dumps/loads")
-                
+    
+    def test_horde_json_file(self):
+        # read from csv file
+        horde = bg.Horde(self.csv_path)
+        
+        # Write to json file
+        horde.save_to_json_path(self.json_path)
+        horde_copy = bg.Horde.from_json_path(self.json_path)
+        
+        self.assertEqual(len(horde), len(horde_copy),
+                         "Length of horde match after json dump/load")
+        for creature, creature_copy in zip(horde, horde_copy):
+            self.assertEqual(creature.level, creature_copy.level,
+                             "Creature level match after json dump/load")
+            self.assertEqual(creature.defenses, creature_copy.defenses,
+                             "Creature defenses match after json dump/load")
+            self.assertEqual(creature.ability, creature_copy.ability,
+                             "Creature ability match after json dump/load")
+            self.assertEqual(creature.desc, creature_copy.desc,
+                             "Creature desc match after json dump/load")
+            

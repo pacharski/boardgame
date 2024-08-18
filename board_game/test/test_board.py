@@ -34,8 +34,7 @@ class BoardTestCase(unittest.TestCase):
 
     def test_board_json(self):
         board = bg.Board(self.json_path)
-        self.assertEqual(len(board), 419,
-                         "saved board load has 419 spaces")
+        self.assertEqual(len(board), 419, "saved board load has 419 spaces")
         
         jsoninator = bg.Jsoninator({"Board": bg.Board, "Space": bg.Space, 
                                     "Point": bg.Point, "Path": bg.Connection, "Exit": bg.Exit})

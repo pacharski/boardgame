@@ -69,7 +69,7 @@ class HoardTestCase(unittest.TestCase):
         self.assertEqual(len(hoard3), 80,
                          "Hoard3 from_csv_path has 80 treasures")
         
-    def test_hoard_json(self):
+    def test_hoard_json_str(self):
         hoard1 = bg.Hoard(self.csv_path)
         hoard2 = bg.Hoard()
         hoard3 = bg.Hoard.from_csv_path(self.csv_path)
@@ -79,11 +79,6 @@ class HoardTestCase(unittest.TestCase):
         temp_str = json.dumps(hoards, default=jsoninator.default)
         hoards_copy = json.loads(temp_str, object_hook=jsoninator.object_hook)
 
-        # Write a json file
-        # with open(self.json_path, 'w') as json_file:
-        #     json.dump(hoard1, json_file, indent=2, sort_keys=True,
-        #               default=jsoninator.default, ensure_ascii=True)
-        
         self.assertEqual(len(hoards), len(hoards_copy),
                          "Length of list of hoards match after json dumps/loads")
         
@@ -99,4 +94,24 @@ class HoardTestCase(unittest.TestCase):
                                  "Treasure ability match after json dumps/loads")
                 self.assertEqual(treasure.desc, treasure_copy.desc,
                                  "Treasure desc match after json dumps/loads")
-                
+                    
+    def test_hoard_json_file(self):
+        # read from csv file
+        hoard = bg.Hoard(self.csv_path)
+        
+        # Write to json file
+        hoard.save_to_json_path(self.json_path)
+        hoard_copy = bg.Hoard.from_json_path(self.json_path)
+        
+        self.assertEqual(len(hoard), len(hoard_copy),
+                         "Length of hoard match after json dumps/loads")
+        for treasure, treasure_copy in zip(hoard, hoard_copy):
+            self.assertEqual(treasure.level, treasure_copy.level,
+                             "Treasure level match after json dumps/loads")
+            self.assertEqual(treasure.value, treasure_copy.value,
+                             "Treasure value match after json dumps/loads")
+            self.assertEqual(treasure.ability, treasure_copy.ability,
+                             "Treasure ability match after json dumps/loads")
+            self.assertEqual(treasure.desc, treasure_copy.desc,
+                             "Treasure desc match after json dumps/loads")
+            

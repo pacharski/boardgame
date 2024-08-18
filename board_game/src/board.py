@@ -11,7 +11,6 @@ from collections import OrderedDict
 import os
 import sys
 here = os.path.dirname(os.path.abspath(__file__))
-print("\nStartHere", here)
 sys.path.append(os.path.dirname(os.path.dirname(here)))
 import board_game as bg
 
