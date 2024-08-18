@@ -22,7 +22,19 @@ class BoardViewer(bg.BoardView):
         frame.pack( fill=tkinter.BOTH, expand=tkinter.YES )
         super().__init__(frame, board, self.image_path, (400, 300),
                          bg="white", highlightthickness=0 ) 
-        self.focus_set()    
+        self.focus_set() 
+
+    def bind_mouse(self):
+        super().bind_mouse()
+
+    def bind_keys(self):
+        super().bind_keys()
+
+    def bind_meta(self):
+        super().bind_meta()  
+
+    def apply_overlay(self, bbox):
+        super().apply_overlay(bbox)
     
     def run(self):
         tkinter.mainloop()

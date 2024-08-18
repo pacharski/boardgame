@@ -37,10 +37,11 @@ class BoardEditor( bg.BoardView ):
         self.mode = BoardEditor.Mode.cReadOnly
         self.set_overlay("ReadOnly")
         
-        self.bind_mouse()
-        self.bind_keys()
+        # self.bind_mouse()
+        # self.bind_keys()
 
     def bind_mouse(self):
+        super().bind_keys()
         # Left click to mark points when in edit mode
         self.bind("<Button-1>", self.on_mouse_left)
         # Ignore mouse move events when in edit mode
@@ -49,6 +50,7 @@ class BoardEditor( bg.BoardView ):
         # self.bind("<Double-ButtonPress-1>", self.on_mouse_double_left)  
         
     def bind_keys(self):    
+        super().bind_keys()
         # esc to abort define space
         # enter to end define space
         # ctrl-z undo last mark
@@ -58,13 +60,14 @@ class BoardEditor( bg.BoardView ):
         self.bind("<Control-KeyPress-Z>", self.on_key_press_ctrl_z)  
         self.bind("<Control-KeyPress-s>", self.on_key_press_ctrl_s)  
         self.bind("<Control-KeyPress-S>", self.on_key_press_ctrl_s)  
-        self.bind("<Control-KeyPress-m>", self.on_key_press_ctrl_m)  
-        self.bind("<Control-KeyPress-M>", self.on_key_press_ctrl_m)  
+        # self.bind("<Control-KeyPress-m>", self.on_key_press_ctrl_m)  
+        # self.bind("<Control-KeyPress-M>", self.on_key_press_ctrl_m)  
         self.bind("<KeyPress-Return>", self.on_key_press_return)  
         self.bind("<KeyPress-Escape>", self.on_key_press_escape)
         self.bind("<KeyPress>", self.on_key_press)
-        self.bind("<FocusIn>", self.on_focus_in)
-        self.bind("<FocusOut>", self.on_focus_out)    
+        
+    def bind_meta(self):
+        super().bind_meta()
     
     def run(self):
         tkinter.mainloop()
@@ -112,9 +115,9 @@ class BoardEditor( bg.BoardView ):
                             
     def apply_overlay(self, bbox):
         super().apply_overlay(bbox)
-        if self.edit_spaces:
-            visible_bbox = (0, 0, self.width, self.height)
-            self.overlay_space(self.space, bbox, visible_bbox)
+        # if self.edit_spaces:
+        #     visible_bbox = (0, 0, self.width, self.height)
+        #     self.overlay_space(self.space, bbox, visible_bbox)
     
     # def overlay_point(self, point, radius, color, bbox, visible_bbox):
     #     if self.point_in_

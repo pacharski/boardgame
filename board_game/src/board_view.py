@@ -33,17 +33,23 @@ class BoardView( bg.ResizableImage ):
 
     def __init__(self, parent, board, image_path, size, **kwargs):
         width, height = size
-        print("ImagePath", image_path)
         super().__init__(parent, image_path, width=width, height=height, 
                          **kwargs)
         self.board = board
-        
         self.overlay = BoardView.Overlay.cNone
+        self.bind_mouse()
+        self.bind_keys()
+        self.bind_meta()
         
+    def bind_mouse(self):
         self.bind("<Button-1>", self.on_mouse_left)
         self.bind("<B1-Motion>", self.on_mouse_move_left)
+
+    def bind_keys(self):
         self.bind("<Control-KeyPress-m>", self.on_key_press_ctrl_m)  
         self.bind("<Control-KeyPress-M>", self.on_key_press_ctrl_m)  
+
+    def bind_meta(self):
         self.bind("<FocusIn>", self.on_focus_in)
         self.bind("<FocusOut>", self.on_focus_out) 
 
