@@ -14,9 +14,10 @@ class Jsoninator():
         self.types = tuple([type for _, type in self.type_dict.items()])
 
     def is_type(self, json_dict, type_name):
-        return ((type_name in json_dict)
-            or  (("__type__" in json_dict) and (json_dict["__type__"] == type_name)))
-    
+        # return ((type_name in json_dict)
+        #     or  (("__type__" in json_dict) and (json_dict["__type__"] == type_name)))
+        return (("__type__" in json_dict) and (json_dict["__type__"] == type_name))
+
     # use with json.dump/json.dumps default=custom_encoder
     def default(self, o):
         if isinstance(o, self.types):

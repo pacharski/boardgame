@@ -13,13 +13,13 @@ class GameViewer(ag.GameView):
     def __init__(self, name, data_path):
         self.name = name
         self.data_path = data_path
-        board = ag.Game.from_json_path(self.json_path)
-
+        game = ag.Game.from_json_path(self.json_path)
+        
         self.root = tkinter.Tk()
-        self.root.title( "A Game" )
-        frame = tkinter.Frame( self.root )
+        self.root.title("A Game")
+        frame = tkinter.Frame(self.root)
         frame.pack( fill=tkinter.BOTH, expand=tkinter.YES )
-        super().__init__(frame, board, self.image_path, (400, 300),
+        super().__init__(frame, game, self.image_path, (400, 300),
                          bg="white", highlightthickness=0 ) 
         self.focus_set() 
 
@@ -49,5 +49,5 @@ class GameViewer(ag.GameView):
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(here, "data")
-    gv = GameViewer("board", data_path)
+    gv = GameViewer("game", data_path)
     gv.run()

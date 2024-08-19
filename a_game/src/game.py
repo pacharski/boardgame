@@ -14,24 +14,28 @@ import board_game as bg
 
 
 class Game(): 
-    def __init__(self, name=None, data_path=None):
+    def __init__(self, name=None, data_path=None, json_path=None):
         name = name if name != None else ""
-        self.data_path = data_path
-        # if data_path == None:
-        #     here = os.path.dirname(os.path.abspath(__file__))
-        #     self.data_path = data_path if data_path != None else os.path.join(here, "../../data")
+        self.data_path = data_path 
+        if (data_path == None) and (json_path != None):
+            self.data_path = os.path.dirname(json_path)
         self.board_json_path = None if data_path == None else os.path.join(self.data_path, "board" + ".json")
         self.players_json_path = None if data_path == None else os.path.join(self.data_path, "players" + ".json")
         self.hoard_csv_path = None if data_path == None else os.path.join(self.data_path, "hoard" + ".csv")
         self.hoard_json_path = None if data_path == None else os.path.join(self.data_path, "hoard" + ".json")
         self.horde_csv_path = None if data_path == None else os.path.join(self.data_path, "horde" + ".csv")
         self.horde_json_path = None if data_path == None else os.path.join(self.data_path, "horde" + ".json")
+        self.decks_json_path = None if data_path == None else os.path.join(self.data_path, "decks" + ".json")
         
-        self.board = self.create_board()
-        self.hoard = self.create_hoard()
-        self.horde = self.create_horde()
-        self.players = self.create_players()
-
+        if json_path == None:
+            self.board = self.create_board()
+            self.hoard = self.create_hoard()
+            self.horde = self.create_horde()
+            self.players = self.create_players()
+            self.decks = self.create_decks()
+        else:
+            self.load_from_json_path(json_path)
+            
     def create_board(self):
         return bg.Board() if self.board_json_path == None else bg.Board(json_path=self.board_json_path)
     
@@ -44,6 +48,7 @@ class Game():
     def create_players(self):
         # FIXME - read the default players from data/players.json (need jsoninator for list of players)
         if self.players_json_path == None:
+            print("NoPlayerPath")
             return list()
         jsoninator = bg.Jsoninator({"Player": bg.Player, "Marker": bg.Marker,
                                     "Deck": bg.Deck, "Card": bg.Card,
@@ -52,6 +57,16 @@ class Game():
                                    })
         players_json_path = os.path.join(here, "../../data/players.json" )
         with open(players_json_path, 'r') as json_file:
+            return json.load(json_file, object_hook=jsoninator.object_hook)
+        
+    def create_decks(self):
+        # FIXME - read the default decks from data/decks.json (
+        if self.decks_json_path == None:
+            return dict()
+        jsoninator = bg.Jsoninator({"Deck": bg.Deck, "Card": bg.Card,
+                                  })
+        decks_json_path = os.path.join(here, "../../data/decks.json" )
+        with open(decks_json_path, 'r') as json_file:
             return json.load(json_file, object_hook=jsoninator.object_hook)
         
     def __str__(self):
@@ -99,6 +114,7 @@ class Game():
         jsoninator = bg.Jsoninator({"Board": bg.Board, "Space": bg.Space, "Point": bg.Point,
                                     "Exit": bg.Exit, "Connection": bg.Connection,
                                     "Card": bg.Card, "Deck": bg.Deck,
+                                    "Player": bg.Player, "Marker": bg.Marker,
                                     "Hoard": bg.Hoard, "Treasure": bg.Treasure,
                                     "Horde": bg.Horde, "Creature": bg.Creature})
         json_path = json_path if json_path != None else self.json_path
@@ -106,23 +122,23 @@ class Game():
             with open(json_path, 'r') as json_file:
                 json_data = json.load(json_file, object_hook=jsoninator.object_hook)
             if isinstance(json_data, dict):
-                game = Game()
-                game.board = json_data["Board"]
-                game.players = json_data["Players"]
-                game.hoard = json_data["Hoard"]
-                game.horde = json_data["Horde"]
-                return game
+                self.board = json_data["Board"]
+                self.players = json_data["Players"]
+                self.hoard = json_data["Hoard"]
+                self.horde = json_data["Horde"]
+                self.decks = json_data["Decks"] if "Decks" in json_data else dict()
             else:
                 self.board = json_data.board
                 self.players = json_data.players
                 self.hoard = json_data.hoard
                 self.horde = json_data.horde 
+                self.decks = json_data.decks
         except Exception as e:
             print("\nException (Game.load_from_json_path)", e)
             pass
 
     def from_json_path(json_path):
-        return Game(json_path)
+        return Game(json_path=json_path)
 
 
 if __name__ == "__main__":

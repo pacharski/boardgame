@@ -67,6 +67,7 @@ class Board():
                       json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Board")) else
                       None)
         if board_dict != None:
+            #if isinstance(board_dict, dict):
             # print("\nGetName", type(board_dict), board_dict.keys())
             name = board_dict.get("name", None)
             spaces = board_dict["spaces"]
@@ -75,6 +76,9 @@ class Board():
                 if v.id < 0:
                     v.id = int(k)
             return Board(name=name, spaces=spaces)
+            # else:
+            #     print("\nAlreadyIsBoard", type(board_dict))
+            #     return board_dict # should already be Board type
         return json_dict
         
     def save_to_json_path(self, json_path=None):
