@@ -139,6 +139,10 @@ class ResizableImage(ResizableCanvas):
 
     def zoom(self, xy, zoom):
         # convert center from canvas coord (mouse) to image
+        x, y = xy
+        abs_x = self.winfo_rootx() - self.winfo_toplevel().winfo_rootx()
+        abs_y = self.winfo_rooty() - self.winfo_toplevel().winfo_rooty()
+        xy = (x - abs_x, y - abs_y)
         xy = self.view_port.map_to_domain(xy, (0, 0, self.width, self.height))
         if not self.zooming:
             self.zooming = True
@@ -189,21 +193,35 @@ if __name__ == "__main__":
     tkinter.Grid.rowconfigure(root, 0, weight=1)
     tkinter.Grid.columnconfigure(root, 0, weight=1)
 
-    prop_frame=tkinter.Frame(root)
-    prop_frame.grid(row=0, column=0, sticky="news")
+    grid = tkinter.Frame(root)
+    grid.grid(row=0, column=0, sticky="news")
 
-    board_canvas = ResizableImage(prop_frame, image_path, width=400, height=300,
-                                  bg="white", highlightthickness=0)
-    board_canvas.grid(column=1, row=1, columnspan=2, rowspan=2,
-                      sticky="news")
+    center = ResizableImage(grid, image_path, width=400, height=300,
+                            bg="white", highlightthickness=0)
+    center.grid(column=1, row=1, columnspan=2, rowspan=2, sticky="news")
     
-    label00 = tkinter.Label(prop_frame, text="Label00").grid(column=0, row=0)
-    label30 = tkinter.Label(prop_frame, text="Label30").grid(column=3, row=0)
-    label03 = tkinter.Label(prop_frame, text="Label03").grid(column=0, row=3)
-    label33 = tkinter.Label(prop_frame, text="Label33").grid(column=3, row=3)
+    corner00 = tkinter.Canvas(grid, width=100, height=75, bg="grey", highlightthickness=0).grid(
+        column=0, row=0)
+    corner30 = tkinter.Canvas(grid, width=100, height=75, bg="grey", highlightthickness=0).grid(
+        column=3, row=0)
+    corner03 = tkinter.Canvas(grid, width=100, height=75, bg="grey", highlightthickness=0).grid(
+        column=0, row=3)
+    corner33 = tkinter.Canvas(grid, width=100, height=75, bg="grey", highlightthickness=0).grid(
+        column=3, row=3)
     
-    tkinter.Grid.columnconfigure(prop_frame, tuple(range(4)), weight=1)
-    tkinter.Grid.rowconfigure(prop_frame, tuple(range(4)), weight=1)
+    side_n = tkinter.Canvas(grid, width=400, height=75,  bg="green", highlightthickness=0).grid(
+        column=1, row=0, columnspan=2, sticky="ew")
+    side_e = tkinter.Canvas(grid, width=100, height=300, bg="green", highlightthickness=0).grid(
+        column=3, row=1, rowspan=2, sticky="ns")
+    side_w = tkinter.Canvas(grid, width=100, height=300, bg="green", highlightthickness=0).grid(
+        column=0, row=1, rowspan=2, sticky="ns")
+    side_s = tkinter.Canvas(grid, width=400, height=75,  bg="green", highlightthickness=0).grid(
+        column=1, row=3, columnspan=2, sticky="ew")
+
+    tkinter.Grid.columnconfigure(grid, tuple(range(4)), weight=1)
+    tkinter.Grid.rowconfigure(grid, tuple(range(4)), weight=1)
+    tkinter.Grid.columnconfigure(grid, tuple(range(1,2)), weight=4)
+    tkinter.Grid.rowconfigure(grid, tuple(range(1,2)), weight=4)
     
     tkinter.mainloop()
 

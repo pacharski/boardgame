@@ -66,27 +66,3 @@ class GameView(bg.BoardView):
         
     def on_key_press(self, event):
         pass
-
-
-# if __name__ == "__main__":
-#     import os
-#     import tkinter
-
-#     here = os.path.abspath(__file__)
-#     print()
-#     print("Here", here)
-#     json_path = os.path.join(os.path.dirname(here), "data/board.json" )
-#     board = bg.Board.from_json_path(json_path)
- 
-#     root = tkinter.Tk()
-#     root.title( "viewing" )
-#     frame = tkinter.Frame( root )
-#     frame.pack( fill=tkinter.BOTH, expand=tkinter.YES )
-    
-#     image_path = os.path.join(os.path.dirname(here), "data/board.png")
-#     canvas = BoardView( frame, board, image_path, (400, 300),
-#                          bg="white", highlightthickness=0 ) 
-    
-#     canvas.focus_set()    
-#     tkinter.mainloop()
-
