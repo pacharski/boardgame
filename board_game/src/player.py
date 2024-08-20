@@ -35,7 +35,8 @@ class Player():
                 "id":          self.id,
                 "marker":      self.marker.json_encode(),
                 "decks":       self.decks,
-                "location":    self.location}
+                "location":    self.location
+               }
     
     # Note: this is a class function
     def json_decode(json_dict):

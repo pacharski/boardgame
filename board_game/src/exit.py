@@ -32,17 +32,21 @@ class Exit():
                            self.destination)
     
     def json_encode(self):
-        return { "Exit": { "name":          self.name,
-                           "destination":   self.destination,
-                           "barrier":        self.barrier
-                         } }
+        return {"__type__":     "Exit",
+                "name":         self.name,
+                "destination":  self.destination,
+                "barrier":      self.barrier
+               }
     
     # Note: this is a class function
     def json_decode(json_dict):
-        if "Exit" in json_dict:
-            name        = json_dict["Exit"]["name"]
-            destination = json_dict["Exit"]["destination"]
-            barrier     = json_dict["Exit"]["barrier"]
+        exit_dict = (json_dict["Exit"] if "Exit" in json_dict else
+                     json_dict if ("__type__" in json_dict) and (json_dict["__type__"] == "Exit") else
+                     None)
+        if exit_dict != None:
+            name        = exit_dict["name"]
+            destination = exit_dict["destination"]
+            barrier     = exit_dict["barrier"]
             return Exit(name=name,
                         destination=int(destination),
                         barrier=barrier

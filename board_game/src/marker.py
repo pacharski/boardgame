@@ -24,20 +24,25 @@ class Marker():
                            self.image_path)
     
     def json_encode(self):
-        return {"Marker": {"name": self.name,
-                          "color": self.color,
-                          "shape": self.shape,
-                          "size": self.size,
-                          "image_path": self.image_path}}
+        return {"__type__":    "Marker",
+                "name":        self.name,
+                "color":       self.color,
+                "shape":       self.shape,
+                "size":        self.size,
+                "image_path":  self.image_path
+               }
     
     # Note: this is a class function
     def json_decode(json_dict):
-        if "Marker" in json_dict:
-            name       = json_dict["Marker"]["name"]
-            color      = json_dict["Marker"]["color"]
-            shape      = json_dict["Marker"]["shape"]
-            size       = json_dict["Marker"]["size"]
-            image_path = json_dict["Marker"]["image_path"]
+        marker_dict = (json_dict["Marker"] if "Marker" in json_dict else
+                       json_dict if ("__type__" in json_dict) and (json_dict["__type__"] == "Marker") else
+                       None)
+        if marker_dict != None:
+            name       = marker_dict["name"]
+            color      = marker_dict["color"]
+            shape      = marker_dict["shape"]
+            size       = marker_dict["size"]
+            image_path = marker_dict["image_path"]
             return Marker(name=name,
                          color=color,
                          shape=shape,

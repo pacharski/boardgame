@@ -25,6 +25,9 @@ class Board():
         self.json_path=json_path
         if self.json_path != None:
             self.load_from_json_path(self.json_path)
+
+    def find_space_by_location(self, id):
+        return self.spaces[id]
         
     def find_space(self, point):
         x, y = point.xy
