@@ -8,7 +8,7 @@ from enum import IntEnum
 import board_game as bg
 
 
-class BoardView( bg.ResizableImage ):
+class BoardView(bg.ResizableImage):
     cLevelColors = ["#11f", #0: Dark Blue
                     "#ff1", #1: Orange
                     "#3bf", #2: Light Blue

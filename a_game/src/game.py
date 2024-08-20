@@ -99,7 +99,8 @@ class Game():
         return json_dict
     
     def save_to_json_path(self, json_path=None):
-        jsoninator = bg.Jsoninator({"Board": bg.Board, "Space": bg.Space, "Point": bg.Point,
+        jsoninator = bg.Jsoninator({"Game": Game,
+                                    "Board": bg.Board, "Space": bg.Space, "Point": bg.Point,
                                     "Exit": bg.Exit, "Connection": bg.Connection,
                                     "Card": bg.Card, "Deck": bg.Deck,
                                     "Player": bg.Player, "Marker": bg.Marker,
@@ -112,7 +113,8 @@ class Game():
             
     # this is a class function and constructs a new Board
     def load_from_json_path(self, json_path=None):
-        jsoninator = bg.Jsoninator({"Board": bg.Board, "Space": bg.Space, "Point": bg.Point,
+        jsoninator = bg.Jsoninator({"Game": Game,
+                                    "Board": bg.Board, "Space": bg.Space, "Point": bg.Point,
                                     "Exit": bg.Exit, "Connection": bg.Connection,
                                     "Card": bg.Card, "Deck": bg.Deck,
                                     "Player": bg.Player, "Marker": bg.Marker,
@@ -144,4 +146,5 @@ class Game():
 
 if __name__ == "__main__":
     game = Game()
+    #agents = [bg.Agent(player, game.board) for player in game.players]
     print(game)

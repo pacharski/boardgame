@@ -15,7 +15,7 @@ class MarkerView():
         return form.format(self.marker) 
     
     def size(self, scale=1.0):
-        size = self.marker.size if self.marker.size != None else 5
+        size = self.marker.size if self.marker.size != None else 10
         return int(size * scale)
     
     @property

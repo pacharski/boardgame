@@ -14,13 +14,16 @@ class GamePlayer(ag.GameView):
         self.name = name
         self.data_path = data_path
         self.game = ag.Game.from_json_path(self.json_path)
+        self.game.save_to_json_path(json_path="newgame.json")
         self.agents = [bg.Agent(player, self.game.board) for player in self.game.players]
+        self.active_agent = -1
+        self.active_actions = []
         
         self.root = tkinter.Tk()
         self.root.title("Game Player")
         frame = tkinter.Frame(self.root)
         frame.pack( fill=tkinter.BOTH, expand=tkinter.YES )
-        super().__init__(frame, game, self.image_path, (400, 300),
+        super().__init__(frame, self.game, self.image_path, (400, 300),
                          bg="white", highlightthickness=0 ) 
         self.focus_set() 
 
@@ -35,9 +38,28 @@ class GamePlayer(ag.GameView):
 
     def apply_overlay(self, bbox):
         super().apply_overlay(bbox)
-    
+
+    def play(self):
+        if len(self.active_actions) == 0:
+            self.active_agent = (self.active_agent + 1) % len(self.agents)
+            agent = self.agents[self.active_agent]
+            self.active_actions = [action for action in agent.turn()]
+        if len(self.active_actions) > 0:
+            action, self.active_actions = self.active_actions[0], self.active_actions[1:]
+            if (action != None) and (len(action) > 0):
+                agent = self.agents[self.active_agent]
+                if action[0] == "move":
+                    location, barrier, destination = action[1:]
+                    agent.player.location = destination
+                    
+    def update(self):
+        self.play()
+        self.resize()
+        self.root.after(50, self.update)  # call update again after 1/2 second
+
     def run(self):
-        tkinter.mainloop()
+        self.update()
+        self.root.mainloop()
 
     @property
     def json_path(self):
