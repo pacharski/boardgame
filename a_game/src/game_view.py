@@ -50,7 +50,12 @@ class GameView(bg.BoardView):
             self.overlay_treasure(treasure)
 
     def overlay_player(self, player):
-        print(player.marker)
+        scale = self.view_port.scale / 20
+        if player.location != None:
+            #find center point for location
+            space = self.board.find_space_by_location(player.location)
+            xy = self.view_port.map_to_visible(space.center.xy, self.visible_bbox)
+            bg.MarkerView(player.marker).draw(self, xy, scale)
         
     def overlay_deck(self, card):
         # print(card)

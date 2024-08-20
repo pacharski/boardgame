@@ -102,6 +102,7 @@ class Game():
         jsoninator = bg.Jsoninator({"Board": bg.Board, "Space": bg.Space, "Point": bg.Point,
                                     "Exit": bg.Exit, "Connection": bg.Connection,
                                     "Card": bg.Card, "Deck": bg.Deck,
+                                    "Player": bg.Player, "Marker": bg.Marker,
                                     "Hoard": bg.Hoard, "Treasure": bg.Treasure,
                                     "Horde": bg.Horde, "Creature": bg.Creature})
         json_path = json_path if json_path != None else self.json_path
