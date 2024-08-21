@@ -9,11 +9,11 @@ from copy import deepcopy
 class Exit():
     cBarriers = ["", "Door", "Secret Door"]
     
-    def __init__(self, name="", destination=None, barrier="", open=set()):
-        self.name        = name
+    def __init__(self, name=None, destination=None, barrier=None, open=None):
+        self.name        = name if name != None else ""
         self.destination = destination
-        self.barrier     = barrier
-        self.open        = open # per player (for secrect doors)
+        self.barrier     = barrier if barrier != None else ""
+        self.open        = open if open != None else set() # per player (for secrect doors)
         
     def reset(self):
         self.name = ""
