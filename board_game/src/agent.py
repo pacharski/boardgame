@@ -14,34 +14,70 @@ import board_game as bg
 
 
 class Agent(): 
-    def __init__(self, player: bg.Player, board: bg.Board):
+    def __init__(self, player: bg.Player, board: bg.Board, players: list):
         self.player = player
         self.board = board
+        self.players = players
 
     def turn(self):
-        move_count = random.randint(0, 5)
-        action_count = 1
-        while action_count > 0:
-            if action_count <= move_count:
-                action = self.move()
+        action_list = self.move(5)
+        if action_list != None:
+            for action in action_list:
                 yield action
-                action_count += 1
-            else:
-                action_count = 0
+        
+    def move(self, max_moves=None):
+        """ figure out the possible move options for the player, and pick one"""
+        max_moves = max_moves if (max_moves != None) else 5
+        for move_count in range(max_moves):
+            """
+                Use all the moves to be a valid option or end at an encounter
+                Do not end in space with another player unless it is a big room to be valid
+                Ending on a space with an unknown secret door without a monster to fight, allows
+                 searching for the secret door
+            """
+            valid_options = self.search_moves(self.player, self.player.location, move_count, [], [])
+        if len(valid_options) > 1:
+            select = random.randint(1, len(valid_options))
+            return valid_options[select-1]
+        elif len(valid_options) > 0:
+            return valid_options[0]
+        # default to return None (should never happen, could always stay where you are)
 
-    def take_turn(self):
-        self.move()
+    def is_encounter(self, location):
+        space = self.board.spaces[location]
+        return ((space.name != "")
+             and (location != self.player.location)
+             and (location != 92)
+             and (location != 93))
+    
+    def is_occupied(self, location):
+        # exclude self.player
+        occupied_locations = [player.location for player in self.players if player != self.player]
+        return location in occupied_locations
 
-    def move(self):
-        count = random.randint(0, 5)
-        for _ in range(count):
-            exits = self.board.spaces[self.player.location].exits
-            if (exits != None) and (len(exits) > 0):
-                exit = exits[random.randint(1, len(exits)) - 1]
-                from_location = self.player.location
-                self.player.location = exit.destination 
-                return ("Move", from_location, exit.barrier, self.player.location)
-
+    def search_moves(self, player, location, count, option, valid_options):
+        """recursive search to create a list of valid move options"""
+        encounter = self.is_encounter(location) # check board state
+        occupied = self.is_occupied(location) # check board state, exclude self.player
+        # if no more movement left, done moving
+        if count == 0:
+            if not occupied:
+                # check for secret doors
+                valid_options.append(option)
+            return valid_options
+        # if encounter (creature to fight)
+        if encounter:
+            if not occupied:
+                # need to resolve encounter
+                valid_options.append(option)
+            return valid_options
+        # there should always be at least one exit
+        for exit in self.board.spaces[location].exits:
+            exit_option = ("Move", location, exit.barrier, exit.destination)
+            new_option = option + [exit_option]
+            self.search_moves(player, exit.destination, count-1, new_option, valid_options)
+        return valid_options
+        
     
 if __name__ == "__main__":
     import os

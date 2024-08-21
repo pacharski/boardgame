@@ -14,8 +14,12 @@ class GamePlayer(ag.GameView):
         self.name = name
         self.data_path = data_path
         self.game = ag.Game.from_json_path(self.json_path)
-        self.game.save_to_json_path(json_path="newgame.json")
-        self.agents = [bg.Agent(player, self.game.board) for player in self.game.players]
+        #self.game.save_to_json_path(json_path="newgame.json")
+        # disable all but 4 players
+        # for pid in range(4, len(self.game.players)):
+        #     self.game.players[pid].location = None
+        self.agents = [bg.Agent(player, self.game.board, self.game.players) 
+                       for player in self.game.players if player.location != None]
         self.active_agent = -1
         self.active_actions = []
         
@@ -48,7 +52,7 @@ class GamePlayer(ag.GameView):
             action, self.active_actions = self.active_actions[0], self.active_actions[1:]
             if (action != None) and (len(action) > 0):
                 agent = self.agents[self.active_agent]
-                if action[0] == "move":
+                if action[0] == "Move":
                     location, barrier, destination = action[1:]
                     agent.player.location = destination
                     
