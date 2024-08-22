@@ -4,24 +4,22 @@ from pathlib import Path
 print('Running' if __name__ == '__main__' else
       'Importing', Path(__file__).resolve())
 
-try:
-    from model.marker import Marker
-except:
-    pass
-try:
-    from board_game.model import Marker
-except:
-    pass
+import os
+import sys
+here = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(os.path.dirname(here)))
+import board_game as bg
 
 class Player():
     def __init__(self, name=None, desc=None, marker=None, decks=None, 
-                 location=None, id=None):
+                 location=None, id=None, hoard=None):
         self.name = name
         self.desc = desc
         self.id = id
         self.marker = marker
         self.decks = decks if decks != None else dict()
         self.location = location
+        self.hoard = hoard if hoard != None else bg.Hoard()
         
     def __str__(self):
         form = "Player: {} {} {} {} Decks={} at {}"
@@ -35,7 +33,8 @@ class Player():
                 "id":          self.id,
                 "marker":      self.marker.json_encode(),
                 "decks":       self.decks,
-                "location":    self.location
+                "location":    self.location,
+                "hoard":       self.hoard
                }
     
     # Note: this is a class function
@@ -50,12 +49,14 @@ class Player():
             marker    = json_dict["marker"]
             decks     = json_dict["decks"]
             location  = json_dict["location"]
+            hoard     = json_dict.get("hoard", bg.Hoard())
             return Player(name=name,
                           desc=desc,
                           id=id,
                           marker=marker,
                           decks=decks,
-                          location=location
+                          location=location,
+                          hoard=hoard
                          )
     
         
@@ -68,12 +69,12 @@ if __name__ == '__main__':
     deck1 = Deck("Spell Cards", cards=[*(card1 * 9), *(card2 * 9)])
     deck2 = Deck("Spill Cards", cards=[*(card2 * 9), *(card3 * 6)])
 
-    p1   = Player("Fred",    "Driver", marker=Marker("", "green"), decks=None, location=0, id=1)
-    p2   = Player("Daphne",  "Beauty", marker=Marker("", "blue" ), location=23,   id=2)
-    p3   = Player("Velma",   "Brains", marker=Marker("", "red"  ), location=100,  id=3)
-    p4   = Player("Scooby",  "Knight", marker=Marker("", "red"  ), location=212,  id=4)
-    p5   = Player("Shaggy",  "Reason", marker=Marker("", "white"), location=256,  id=5)
-    npc1 = Player("Old Man", "Sneak",  marker=Marker("", "black", "star"), location=12, decks={"deck1": deck1, "deck2": deck2})
+    p1   = Player("Fred",    "Driver", marker=bg.Marker("", "green"), decks=None, location=0, id=1)
+    p2   = Player("Daphne",  "Beauty", marker=bg.Marker("", "blue" ), location=23,   id=2)
+    p3   = Player("Velma",   "Brains", marker=bg.Marker("", "red"  ), location=100,  id=3)
+    p4   = Player("Scooby",  "Knight", marker=bg.Marker("", "red"  ), location=212,  id=4)
+    p5   = Player("Shaggy",  "Reason", marker=bg.Marker("", "white"), location=256,  id=5)
+    npc1 = Player("Old Man", "Sneak",  marker=bg.Marker("", "black", "star"), location=12, decks={"deck1": deck1, "deck2": deck2})
 
     players = [p1, p2, p3, p4, p5, npc1]
     for player in players:

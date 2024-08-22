@@ -52,6 +52,13 @@ class Hoard():
         elif json_path != None:
             self.load_from_json_path(json_path)
 
+    def add(self, treasure):
+        self.treasures.append(treasure)
+
+    @property
+    def value(self):
+        return sum([treasure.value for treasure in self.treasures])
+        
     def load_from_csv_path(self, csv_path):
         with open(csv_path, newline='') as csv_file:
             reader = csv.reader(csv_file)

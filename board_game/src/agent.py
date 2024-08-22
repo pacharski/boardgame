@@ -57,6 +57,10 @@ class Agent():
     
     def is_occupied(self, location):
         # exclude self.player
+        space = self.board.spaces[location]
+        if (space.name != "") and (space.name != "Room"):
+            # Big room has no limit on number of players landing there
+            return False
         occupied_locations = [player.location for player in self.players if player != self.player]
         return location in occupied_locations
 

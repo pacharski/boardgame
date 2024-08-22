@@ -54,7 +54,8 @@ class GamePlayer(ag.GameView):
                 agent = self.agents[self.active_agent]
                 action, location, exit = action
                 if action == "Move":
-                    self.move_player(agent.player, location, exit)
+                    if not self.move_player(agent.player, location, exit):
+                        self.active_actions = []
                 elif action == "Encounter":
                     self.encounter(agent.player, location, exit)
                 elif action == "SecretDoor":
@@ -62,41 +63,95 @@ class GamePlayer(ag.GameView):
 
     def move_player(self, player, location, exit):
         if exit.barrier == "Secret Door":
-            print("Try to find secret door")
-            # Abortplayer.location = destination
+            if player not in exit.open:
+                # secret door is not found, cannot go through
+                print("Secret Door is not found", player.name, exit)
+                return False
         player.location = exit.destination
+        return True
+
+    def getAdversary(self, level):
+        adversaries = [creature for creature in self.game.horde if creature.level == level]
+        if len(adversaries) > 0:
+            return random.choice(adversaries)
+        
+    def getReward(self, level):
+        rewards = [treasure for treasure in self.game.hoard if treasure.level == level]
+        if len(rewards) > 0:
+            reward = random.choice(rewards)
+            self.game.hoard = [treasure for treasure in self.game.hoard if treasure != reward]
+            return reward
                     
     def encounter(self, player, location, exit):
         space = self.game.board.spaces[location]
         if (space.name == "Room"):
             if (space.num_encounters == 0):        
-                print("Setup new Room encounter for", player.name, location)
-                space.encounters.append(("Adversary", "Reward", player))
+                adversary = self.getAdversary(space.level)
+                reward = self.getReward(space.level)
+                print("Setup new Room encounter for", player.name, location, 
+                      adversary.desc, reward.desc)
+                space.encounters.append((adversary, reward, player))
+                self.fight_adversary(space, adversary, reward, player)
             else:
                 adversary, reward, assigned = space.encounters[0]
                 if adversary != None:
-                    print("Takeover Room encounter for", player.name, location)
+                    print("Takeover Room encounter for", player.name, location, 
+                          adversary.desc)
                     space.encounters[0] = (adversary, reward, player)
+                    self.fight_adversary(space, adversary, reward, player)
                 else:
                     #No Encounter
                     pass
         elif (space.name != "") and (space.id != 92) and (space.id != 93):
             # big room
             if (space.num_encounters == 0):
-                print("Setup new BigRoom encounter for", player.name, location)
-                space.encounters.append(("Adversary", "Rewards", player))
+                adversary = self.getAdversary(space.level)
+                print("Setup new BigRoom encounter for", player.name, location, 
+                      adversary.desc)
+                space.encounters.append((adversary, None, player))
+                self.fight_adversary(space, adversary, None, player)
             else:
                 got_one = False
                 for encounter in space.encounters:
                     adversary, reward, assigned = encounter
                     if assigned == None:
-                        print("Takeover BigRoom encounter for", player.name, location)
+                        print("Takeover BigRoom encounter for", player.name, location, 
+                              adversary.desc)
                         encounter = (adversary, reward, player)
+                        self.fight_adversary(space, adversary, reward, player)
                         got_one = True
                         break
                 if not got_one:
-                    print("Setup new BigRoom encounter for", player.name, location)
-                    space.encounters.append(("Adversary", "Rewards", player))
+                    adversary = self.getAdversary(space.level)
+                    print("Setup new BigRoom encounter for", player.name, location, 
+                          adversary.desc)
+                    space.encounters.append((adversary, None, player))
+                    self.fight_adversary(space, adversary, None, player)
+
+    def get_defense(self, adversary, player):
+        defense = (adversary.defenses[0] if (player.desc == "Elf") else
+                   adversary.defenses[1] if (player.desc == "Hero") else
+                   adversary.defenses[2] if (player.desc == "Super Hero") else
+                   adversary.defenses[3] if (player.desc == "Wizard") else
+                   "13")
+        return int(defense) if defense != "-" else 13
+
+    def fight_adversary(self, space, adversary, reward, player):
+        if adversary.desc.startswith("Trap"):
+            pass # FIXME handle traps
+        else:
+            roll = random.randint(1, 6) + random.randint(1, 6)
+            defense = self.get_defense(adversary, player)
+            killed = roll >= defense
+            if killed:
+                if reward != None:
+                    print("AddRewardToPlayer", reward, player.name)
+                    player.hoard.add(reward)
+                print(player.name, "killed", adversary.desc, "and won", 
+                      reward.desc if reward != None else "nothing",
+                      "total", player.hoard.value)
+                space.encounter = (None, None, None)
+
     
     def secret_door(self, player: bg.Player, location, exit: bg.Exit):
         if exit.barrier != "Secret Door":
@@ -105,16 +160,16 @@ class GamePlayer(ag.GameView):
         if player in exit.open:
             # already found
             return True
+        return self.search_for_secret_door(exit, player)
+
+    def search_for_secret_door(self, exit, player):
         # FIXME add magic item to find secret doors
-        print("Try to find secret door", exit)
         roll = random.randint(1, 6)
-        if ((roll < 3)
-            or (player.desc == "Elf") and (roll < 5)):
-            # found it!
+        found = (roll < 5) if (player.desc == "Elf") else (roll < 3)
+        print("Search for secret door {}".format("found" if found else "not found"), exit)
+        if found:
             exit.open.add(player)
-            return True
-        else:
-            return False
+        return found
              
     def update(self):
         self.play()
