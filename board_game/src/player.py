@@ -11,70 +11,57 @@ sys.path.append(os.path.dirname(os.path.dirname(here)))
 import board_game as bg
 
 class Player():
-    def __init__(self, name=None, desc=None, marker=None, decks=None, 
-                 location=None, id=None, hoard=None):
+    def __init__(self, id=None, location=None, name=None, desc=None, marker=None):
+        self.id = id
+        self.location = location
         self.name = name
         self.desc = desc
-        self.id = id
         self.marker = marker
-        self.decks = decks if decks != None else dict()
-        self.location = location
-        self.hoard = hoard if hoard != None else bg.Hoard()
         
     def __str__(self):
-        form = "Player: {} {} {} {} Decks={} at {}"
-        return form.format("P" + str(self.id) if self.id != None else "NPC",
-                           self.name, self.desc, self.marker, len(self.decks), self.location)
-    
+        form = "Player: {id} at {location} {name} {desc} Marker={color}-{shape}"
+        return form.format(id=("P" + str(self.id) if self.id != None else "NPC"),
+                           location=(self.location if self.location != None else "Nowhere"), 
+                           name=(self.name if self.name != None else "Nobody"), 
+                           desc=(self.desc if self.desc != None else "Non-descript"),
+                           color=(self.marker.color if self.marker != None else None),
+                           shape=(self.marker.shape if self.marker != None else None))
+                           
     def json_encode(self):
         return {"__type__":    "Player",
+                "id":          self.id,
+                "location":    self.location,
                 "name":        self.name,
                 "desc":        self.desc,
-                "id":          self.id,
-                "marker":      self.marker.json_encode(),
-                "decks":       self.decks,
-                "location":    self.location,
-                "hoard":       self.hoard
+                "marker":      self.marker, #.json_encode(),
                }
     
     # Note: this is a class function
     def json_decode(json_dict):
-        player_dict = (json_dict["Player"] if ("Player" in json_dict) else
-                       json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Player")) else
+        #player_dict = (json_dict["Player"] if ("Player" in json_dict) else
+        player_dict = (json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Player")) else
                        None)
         if player_dict != None:
+            id        = json_dict["id"]
+            location  = json_dict["location"]
             name      = json_dict["name"]
             desc      = json_dict["desc"]
-            id        = json_dict["id"]
             marker    = json_dict["marker"]
-            decks     = json_dict["decks"]
-            location  = json_dict["location"]
-            hoard     = json_dict.get("hoard", bg.Hoard())
-            return Player(name=name,
-                          desc=desc,
-                          id=id,
-                          marker=marker,
-                          decks=decks,
+            return Player(id=id,
                           location=location,
-                          hoard=hoard
+                          name=name,
+                          desc=desc,
+                          marker=marker
                          )
     
         
 if __name__ == '__main__':
-    from card import Card, Deck
-    card1 = Card("Zap",   "Zap")   
-    card2 = Card("Zop",   "Zop")   
-    card3 = Card("Phase", "Phase") 
-
-    deck1 = Deck("Spell Cards", cards=[*(card1 * 9), *(card2 * 9)])
-    deck2 = Deck("Spill Cards", cards=[*(card2 * 9), *(card3 * 6)])
-
-    p1   = Player("Fred",    "Driver", marker=bg.Marker("", "green"), decks=None, location=0, id=1)
-    p2   = Player("Daphne",  "Beauty", marker=bg.Marker("", "blue" ), location=23,   id=2)
-    p3   = Player("Velma",   "Brains", marker=bg.Marker("", "red"  ), location=100,  id=3)
-    p4   = Player("Scooby",  "Knight", marker=bg.Marker("", "red"  ), location=212,  id=4)
-    p5   = Player("Shaggy",  "Reason", marker=bg.Marker("", "white"), location=256,  id=5)
-    npc1 = Player("Old Man", "Sneak",  marker=bg.Marker("", "black", "star"), location=12, decks={"deck1": deck1, "deck2": deck2})
+    p1   = Player(id=1, location=1, name="Fred",    desc="Driver", marker=bg.Marker("", "green"))
+    p2   = Player(id=1, location=1, name="Daphne",  desc="Beauty", marker=bg.Marker("", "blue" ))
+    p3   = Player(id=1, location=1, name="Velma",   desc="Brains", marker=bg.Marker("", "red"  ))
+    p4   = Player(id=1, location=1, name="Scooby",  desc="Knight", marker=bg.Marker("", "red"  ))
+    p5   = Player(id=1, location=1, name="Shaggy",  desc="Reason", marker=bg.Marker("", "white"))
+    npc1 = Player(id=1, location=1, name="Old Man", desc="Sneak",  marker=bg.Marker("", "black", "star"))
 
     players = [p1, p2, p3, p4, p5, npc1]
     for player in players:

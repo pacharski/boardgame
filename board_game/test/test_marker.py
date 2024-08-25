@@ -11,16 +11,16 @@ import board_game as bg
 
 class MarkerTestCase(unittest.TestCase):
     def setUp(self):
-        t1 = bg.Marker("G-er", "green", "square") 
-        t2 = bg.Marker("B-er", "blue",  "circle") 
-        t3 = bg.Marker("R-er", "red",   "triangle")  
-        t4 = bg.Marker("R-er", "red",   "triangle")   
-        t5 = bg.Marker("W-er", "white", "star")
+        t1 = bg.Marker("green",   "square", name="G-er") 
+        t2 = bg.Marker( "blue",   "circle", size=5) 
+        t3 = bg.Marker(  "red", "triangle")  
+        t4 = bg.Marker(  "red", "triangle")   
+        t5 = bg.Marker("white",     "star", name="W-er")
 
         self.markers = [t1, t2, t3, t4, t5]
 
     def test_marker_construct(self):
-        t1 = bg.Marker("G-er", "green", "square") 
+        t1 = bg.Marker("green", "square", name="G-er") 
         self.assertEqual(t1.name, 
                          "G-er",
                          "Marker: name not set in constructor")
