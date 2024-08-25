@@ -42,7 +42,8 @@ class Board():
                 
     def add_space(self, space, copy=False):
         space_id = (self.last_space_id + 1 if (self.last_space_id != None) else
-                    max(self.spaces.keys()) + 1)
+                    (max(self.spaces.keys()) + 1) if (len(self.spaces.keys()) > 0) else
+                    0)
         self.spaces[space_id] = space.deep_copy() if copy else space
         self.spaces[space_id].id = space_id
         self.last_space_id = space_id

@@ -140,13 +140,16 @@ class BoardView(bg.ResizableImage):
         level_idx = level if level >= 0 and level < len(BoardView.cLevelColors) else 0
         return BoardView.cLevelColors[level_idx]
     
+    def level_color(self, level):
+        return BoardView.cLevelColors[max(0, level)]
+    
     def id_color(self, id, level):
         return "white" if level != 1 else "black"
                             
     def overlay_space(self, space, bbox, visible_bbox):
         if (space != None) and (space.center != None):
             level = space.level 
-            level_color = BoardView.cLevelColors[max(0, level)]
+            # level_color = self.level_color(level) 
             if self.overlay_centers:
                 center_color = self.center_color(space.id, space.level)
                 self.overlay_center(space.id, space.center, 5, center_color, bbox, visible_bbox)
