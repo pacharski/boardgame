@@ -6,30 +6,32 @@ import json
 
 here = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(here, "../.."))
+import a_game as ag
 import board_game as bg
 
 
 class PlayerTestCase(unittest.TestCase):
     def setUp(self):
-        card1 = bg.Card("Zap",   "Zap")   
-        card2 = bg.Card("Zop",   "Zop")   
+        card1 = bg.Card(  "Zap",   "Zap")   
+        card2 = bg.Card(  "Zop",   "Zop")   
         card3 = bg.Card("Phase", "Phase") 
         
         deck1 = bg.Deck("Spell Cards", cards=[*(card1 * 9), *(card2 * 9)])
         deck2 = bg.Deck("Spill Cards", cards=[*(card2 * 9), *(card3 * 6)])
         
-        p1   = bg.Player("Fred",    "Driver", marker=bg.Marker("", "green"), location=0,    id=1)
-        p2   = bg.Player("Daphne",  "Bard",   marker=bg.Marker("", "blue" ), location=23,   id=2)
-        p3   = bg.Player("Velma",   "Wizard", marker=bg.Marker("", "red"  ), location=100,  id=3)
-        p4   = bg.Player("Scooby",  "Knight", marker=bg.Marker("", "red"  ), location=212,  id=4)
-        p5   = bg.Player("Shaggy",  "Rogue",  marker=bg.Marker("", "white"), location=256,  id=5)
-        npc1 = bg.Player("Old Man", "Creep",  marker=bg.Marker("", "black", "star"), location=12, decks={"deck1": deck1, "deck2": deck2})
+        p1   = ag.Player(1,   0, name="Fred",    desc="Driver", marker=bg.Marker("", "green"))
+        p2   = ag.Player(2,  23, name="Daphne",  desc="Bard",   marker=bg.Marker("", "blue" ))
+        p3   = ag.Player(3, 100, name="Velma",   desc="Wizard", marker=bg.Marker("", "red"  ))
+        p4   = ag.Player(4, 212, name="Scooby",  desc="Knight", marker=bg.Marker("", "red"  ))
+        p5   = ag.Player(5, 256, name="Shaggy",  desc="Rogue",  marker=bg.Marker("", "white"))
+        npc1 = ag.Player(location=12, name="Old Man", desc="Creep",  
+                         marker=bg.Marker("black", "star"), 
+                         decks={"deck1": deck1, "deck2": deck2})
         self.players = [p1, p2, p3, p4, p5, npc1]
 
-
     def test_player_construct(self):
-        p1 = bg.Player("Waldo", "Sneak", marker=bg.Marker("W", "yellow", "circle"), 
-                       location=42, id=99) 
+        p1 = ag.Player(99, 42, name="Waldo", desc="Sneak",
+                       marker=bg.Marker("yellow", "circle", name="W")) 
         self.assertEqual(p1.name, 
                          "Waldo",
                          "Player: name set in constructor")
@@ -47,8 +49,9 @@ class PlayerTestCase(unittest.TestCase):
                          "Player: id set in constructor")
 
     def test_player_json(self):
-        jsoninator = bg.Jsoninator({"Marker": bg.Marker, "Player": bg.Player,
-                                    "Card": bg.Card, "Deck": bg.Deck})
+        jsoninator = bg.Jsoninator({"Marker": bg.Marker, "Player": ag.Player,
+                                    "Card": bg.Card, "Deck": bg.Deck,
+                                    "Treasure": bg.Treasure, "Hoard": bg.Hoard})
         temp_str = json.dumps(self.players, default=jsoninator.default)
         players_copy = json.loads(temp_str, object_hook=jsoninator.object_hook)
 
