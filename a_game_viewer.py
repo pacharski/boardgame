@@ -48,6 +48,6 @@ class GameViewer(ag.GameView):
 
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(here, "data")
-    gv = GameViewer("game", data_path)
+    data_path = os.path.join(here, "a_game/data")
+    gv = GameViewer("a_game", data_path)
     gv.run()

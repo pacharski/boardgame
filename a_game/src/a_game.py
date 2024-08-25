@@ -10,6 +10,7 @@ import json
 here = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(here, "../.."))
 
+import a_game as ag
 import board_game as bg
 
 
@@ -47,7 +48,7 @@ class Game():
         if self.players_json_path == None:
             print("NoPlayerPath")
             return list()
-        jsoninator = bg.Jsoninator({"Player": bg.Player, "Marker": bg.Marker,
+        jsoninator = bg.Jsoninator({"Player": ag.Player, "Marker": bg.Marker,
                                     "Deck": bg.Deck, "Card": bg.Card,
                                     "Hoard": bg.Hoard, "Treasure": bg.Treasure,
                                     "Horde": bg.Horde, "Creature": bg.Creature
@@ -100,7 +101,7 @@ class Game():
                                     "Board": bg.Board, "Space": bg.Space, "Point": bg.Point,
                                     "Exit": bg.Exit, "Connection": bg.Connection,
                                     "Card": bg.Card, "Deck": bg.Deck,
-                                    "Player": bg.Player, "Marker": bg.Marker,
+                                    "Player": ag.Player, "Marker": bg.Marker,
                                     "Hoard": bg.Hoard, "Treasure": bg.Treasure,
                                     "Horde": bg.Horde, "Creature": bg.Creature})
         json_path = json_path if json_path != None else self.json_path
@@ -114,7 +115,7 @@ class Game():
                                     "Board": bg.Board, "Space": bg.Space, "Point": bg.Point,
                                     "Exit": bg.Exit, "Connection": bg.Connection,
                                     "Card": bg.Card, "Deck": bg.Deck,
-                                    "Player": bg.Player, "Marker": bg.Marker,
+                                    "Player": ag.Player, "Marker": bg.Marker,
                                     "Hoard": bg.Hoard, "Treasure": bg.Treasure,
                                     "Horde": bg.Horde, "Creature": bg.Creature})
         json_path = json_path if json_path != None else self.json_path

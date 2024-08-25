@@ -18,7 +18,7 @@ class GamePlayer(ag.GameView):
         # disable all but 4 players
         for pid in range(4, len(self.game.players)):
             self.game.players[pid].location = None
-        self.agents = [bg.Agent(player, self.game.board, self.game.players) 
+        self.agents = [ag.Agent(player, self.game.board, self.game.players) 
                        for player in self.game.players if player.location != None]
         self.active_agent = -1
         self.active_actions = []
@@ -153,7 +153,7 @@ class GamePlayer(ag.GameView):
                 space.encounter = (None, None, None)
 
     
-    def secret_door(self, player: bg.Player, location, exit: bg.Exit):
+    def secret_door(self, player: ag.Player, location, exit: bg.Exit):
         if exit.barrier != "Secret Door":
             print("ExitIsNotSecretDoor!!!")            
             return
@@ -190,6 +190,6 @@ class GamePlayer(ag.GameView):
 
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(here, "data")
-    gv = GamePlayer("game", data_path)
+    data_path = os.path.join(here, "a_game/data")
+    gv = GamePlayer("a_game", data_path)
     gv.run()
