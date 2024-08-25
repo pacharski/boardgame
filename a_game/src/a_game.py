@@ -15,16 +15,14 @@ import board_game as bg
 
 class Game(): 
     def __init__(self, name=None, data_path=None, json_path=None):
-        name = name if name != None else ""
+        name = name if name != None else "a_game"
         self.data_path = data_path 
         if (data_path == None) and (json_path != None):
             self.data_path = os.path.dirname(json_path)
-        self.board_json_path = None if data_path == None else os.path.join(self.data_path, "board" + ".json")
+        self.board_json_path = None if data_path == None else os.path.join(self.data_path, self.name + ".json")
         self.players_json_path = None if data_path == None else os.path.join(self.data_path, "players" + ".json")
         self.hoard_csv_path = None if data_path == None else os.path.join(self.data_path, "hoard" + ".csv")
-        self.hoard_json_path = None if data_path == None else os.path.join(self.data_path, "hoard" + ".json")
         self.horde_csv_path = None if data_path == None else os.path.join(self.data_path, "horde" + ".csv")
-        self.horde_json_path = None if data_path == None else os.path.join(self.data_path, "horde" + ".json")
         self.decks_json_path = None if data_path == None else os.path.join(self.data_path, "decks" + ".json")
         
         if json_path == None:
@@ -46,7 +44,6 @@ class Game():
         return bg.Horde() if self.horde_csv_path == None else bg.Horde(csv_path=self.horde_csv_path)
     
     def create_players(self):
-        # FIXME - read the default players from data/players.json (need jsoninator for list of players)
         if self.players_json_path == None:
             print("NoPlayerPath")
             return list()
