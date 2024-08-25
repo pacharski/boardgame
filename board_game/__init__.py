@@ -23,5 +23,4 @@ from board_game.src.json_encoder import CompactJSONEncoder
 from board_game.src.marker_view import MarkerView
 from board_game.src.card_view import CardView
 from board_game.src.board_view import BoardView
-from board_game.src.agent import Agent
 

@@ -67,8 +67,8 @@ class Board():
     
     # Note: this is a class function
     def json_decode(json_dict):
-        board_dict = (json_dict["Board"] if ("Board" in json_dict) else
-                      json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Board")) else
+        #board_dict = (json_dict["Board"] if ("Board" in json_dict) else
+        board_dict = (json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Board")) else
                       None)
         if board_dict != None:
             #if isinstance(board_dict, dict):
