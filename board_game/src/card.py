@@ -46,7 +46,7 @@ class Deck():
         if isinstance(cards, (list, tuple)):
             self.cards.extend(cards)
         else:
-            self.cards.append(card)
+            self.cards.append(cards)
 
     def draw(self, remove=True):
         if remove:
