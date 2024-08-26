@@ -1,110 +1,83 @@
-# organization is project/package/module/submodule
 from pathlib import Path
 print('Running' if __name__ == '__main__' else
       'Importing', Path(__file__).resolve())
 
 import os
 import sys
-import random
 
 here = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(here, "../.."))
 
-import a_game as ag
+import random
+import fafo as ff
 import board_game as bg
 
 
 class Agent(): 
-    def __init__(self, player: ag.Player, board: bg.Board, players: list):
+    def __init__(self, player: ff.Player, game: ff.Game):
         self.player = player
-        self.board = board
-        self.players = players
-
-    def turn(self):
-        action_list = self.move(5)
-        if action_list != None:
-            for action in action_list:
-                yield action
+        self.board = game.board
+        self.game = game
         
-    def move(self, max_moves=None):
+    def move(self):
         """ figure out the possible move options for the player, and pick one"""
-        max_moves = max_moves if (max_moves != None) else 5
-        for move_count in range(max_moves):
-            """
-                Use all the moves to be a valid option or end at an encounter
-                Do not end in space with another player unless it is a big room to be valid
-                Ending on a space with an unknown secret door without a monster to fight, allows
-                 searching for the secret door
-            """
-            valid_options = self.search_moves(self.player, self.player.location, None, move_count, [], [])
-        if len(valid_options) > 1:
-            select = random.randint(1, len(valid_options))
-            return valid_options[select-1]
-        elif len(valid_options) > 0:
-            return valid_options[0]
-        # default to return None (should never happen, could always stay where you are)
+        """
+            draw pile - shuffle all monster cards and here cords (heros have value 8)
+            heros allow matching here shortcut to be used (matches color, 1990 board has
+             hero picture instead of star, these are the dupicate color shortcuts on the 
+             82 board)
 
-    def is_encounter(self, location):
-        space = self.board.spaces[location]
-        if ((space.name == "") or (location == 92) or (location == 93)):
-            return False
-        elif (space.name == "Room"):
-            if space.num_encounters == 0:
-                return True
-            adversary, rewards, assigned = space.encounters[0]
-            return (adversary != None)
-        else: # big room
-            return True
+            draw card (should have 3 already)
+            play card or challenge opponent
+            play card:
+                move spaces using value of card (1-7)
+                Ending on red circle, ambush:
+                    select card from hand
+                    draw card
+                    if select value (1-7) >= draw value:
+                        move forward value of select
+                    else
+                        move backward value of draw
+                    both cards are discarded
+                Starting on, Passing over or onto a space with matching star color (shortcut)
+                    Player can (may) take the shortcut if they played a card with the same color
+                    This is all of players movement (end movement at destination end of shortcut)
+            Challenge
+                Select another player
+                Both place card from hand face down
+                If challenger card >= challenged
+                    challenger moves to space in front of challenged
+                else
+                    end of turn
+                cards are discarded, and players draw a new card to replace them
+            Landing (end of turn) on space with another player
+                combine cards from both hands, and select 3 to keep, return the rest to the other player
+
+            Reach end to win
+                Need exact count to end???
+        """
+        # Draw a card, and pick one of the four cards to either move, or challenge a player
+        new_card = self.game.draw()
+        self.player.hand.add(new_card)
+
+        valid_options = []
+        for card in self.player.hand:
+            valid_options.extend(self.move_ahead(card))
+            valid_options.extend(self.challenge_player(card))
+
+    def move_ahead(self, card):
+        return []
     
-    def is_occupied(self, location):
-        # exclude self.player
-        space = self.board.spaces[location]
-        if (space.name != "") and (space.name != "Room"):
-            # Big room has no limit on number of players landing there
-            return False
-        occupied_locations = [player.location for player in self.players if player != self.player]
-        return location in occupied_locations
-
-    def search_moves(self, player, location, last_exit, count, option, valid_options):
-        """recursive search to create a list of valid move options"""
-        encounter = (len(option) != 0) and self.is_encounter(location) # check board state
-        occupied = self.is_occupied(location) # check board state, exclude self.player
-        # if no more movement left, done moving
-        if count == 0:
-            if not occupied:
-                # check for secret doors
-                space = self.board.spaces[location]
-                secret_doors = [exit for exit in space.exits if exit.barrier == "Secret Door"]
-                if len(secret_doors) > 0:
-                    secret_door = random.choice(secret_doors)
-                    option.append(("SecretDoor", location, secret_door))
-                valid_options.append(option)
-            return valid_options
-        # if encounter (creature to fight)
-        if encounter:
-            if not occupied:
-                # need to resolve encounter
-                option.append(("Encounter", location, last_exit))
-                valid_options.append(option)
-            return valid_options
-        # there should always be at least one exit
-        for exit in self.board.spaces[location].exits:
-            exit_option = ("Move", location, exit)
-            new_option = option + [exit_option]
-            self.search_moves(player, exit.destination, exit, count-1, new_option, valid_options)
-        return valid_options
-        
+    def challenge_player(self, card):
+        return []
+    
     
 if __name__ == "__main__":
-    import os
-    import sys
-    p = ag.Player("Scooby", "Brown Dog", location=93, id=0)
-    here = os.path.dirname(os.path.abspath(__file__))
-    json_path = os.path.join(here, "../../data/board.json")
-    b = bg.Board(json_path=json_path)
-    #b.save_to_json_path("newboard.json")
-    a = Agent(p, b)
-
-    for action in a.turn():
-        print("Action", action)
+    game = ff.Game("fafo", os.path.join(os.path.dirname(here), "data"))
+    agents = [ff.Agent(player, game) for player in game.players]
+    print(game)
+    
+    if len(agents) > 0:
+        actions = agents[0].move()
+        print("Action", actions)
     

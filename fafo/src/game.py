@@ -27,7 +27,7 @@ class Game():
         if json_path == None:
             self.board = self.create_board()
             self.players = self.create_players()
-            self.draw, self.discard = self.create_cards()
+            self.draw_pile, self.discard_pile = self.create_cards()
         else:
             self.load_from_json_path(json_path)
             
@@ -65,33 +65,46 @@ class Game():
                             print(e)
                             count = 0
         return draw, discard
-                
+    
+    def restock(self):
+        self.draw_pile = self.discard_pile
+        self.draw_pile.name = "Draw"
+        self.draw_pile.shuffle()
+        self.discard_pile = bg.Deck("Discard")
+    
+    def draw(self):
+        if len(self.draw_pile) == 0:
+            self.restock()
+        return self.draw_pile.draw() if len(self.draw_pile) > 0 else None
+
+    def discard(self, card):
+        self.discard_pile.add(card)        
                     
     def __str__(self):
         form = "Fafo: Board={} Players={} Cards={}"
-        return form.format(len(self.board), len(self.players), len(self.draw))
+        return form.format(len(self.board), len(self.players), len(self.draw_pile))
         
     def json_encode(self):
-        return {"__type__": "Game",
-                "Board":    self.board,
-                "Players":  self.players,
-                "Draw":     self.draw,
-                "Discard":  self.discard}
+        return {"__type__":     "Game",
+                "Board":        self.board,
+                "Players":      self.players,
+                "DrawPile":     self.draw_pile,
+                "DiscardPile":  self.discard_pile}
         
     # Note: this is a class function
     def json_decode(json_dict):
         game_dict = (json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Game")) else
                      None)
         if game_dict != None:
-            board   = game_dict["Board"]
-            players = game_dict["Players"]    
-            draw    = game_dict["Draw"]
-            discard = game_dict["Discard"]
+            board        = game_dict["Board"]
+            players      = game_dict["Players"]    
+            draw_pile    = game_dict["DrawPile"]
+            discard_pile = game_dict["DiscardPile"]
             game = Game()
             game.board = board
             game.players = players
-            game.draw = draw
-            game.discard = discard
+            game.draw_pile = draw_pile
+            game.discard_pile = discard_pile
             return game
         return json_dict
     
@@ -119,17 +132,10 @@ class Game():
         try:
             with open(json_path, 'r') as json_file:
                 json_data = json.load(json_file, object_hook=jsoninator.object_hook)
-            # if isinstance(json_data, dict):
-            #     self.board = json_data["Board"]
-            #     self.players = json_data["Players"]
-            #     self.hoard = json_data["Hoard"]
-            #     self.horde = json_data["Horde"]
-            #     self.decks = json_data["Decks"] if "Decks" in json_data else dict()
-            # else:
             self.board = json_data.board
             self.players = json_data.players
-            self.draw = json_data.draw
-            self.discard = json_data.discard
+            self.draw_pile = json_data.draw_pile
+            self.discard_pile = json_data.discard_pile
         except Exception as e:
             print("\nException (Game.load_from_json_path)", e)
             pass
