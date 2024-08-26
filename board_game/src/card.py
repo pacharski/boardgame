@@ -1,7 +1,8 @@
-# organization is project/package/module/submodule
 from pathlib import Path
 print('Running' if __name__ == '__main__' else
       'Importing', Path(__file__).resolve())
+
+import random
 
 
 class Card():
@@ -46,6 +47,15 @@ class Deck():
             self.cards.extend(cards)
         else:
             self.cards.append(card)
+
+    def draw(self, remove=True):
+        if remove:
+            return self.cards.pop() if len(self.cards) > 0 else None
+        return self.cards[0]
+    
+    def shuffle(self):
+        if self.cards != None:
+            random.shuffle(self.cards)
 
     def __iter__(self):
         for card in self.cards:
