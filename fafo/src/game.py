@@ -1,0 +1,145 @@
+from pathlib import Path
+print('Running' if __name__ == '__main__' else
+      'Importing', Path(__file__).resolve())
+
+import os
+import sys
+import json
+import csv
+
+here = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(here, "../.."))
+
+import fafo as ff
+import board_game as bg
+
+
+class Game(): 
+    def __init__(self, name=None, data_path=None, json_path=None):
+        self.name = name if name != None else "fafo"
+        self.data_path = data_path 
+        if (data_path == None) and (json_path != None):
+            self.data_path = os.path.dirname(json_path)
+        self.board_json_path = None if data_path == None else os.path.join(self.data_path, self.name + ".json")
+        self.players_json_path = None if data_path == None else os.path.join(self.data_path, "players" + ".json")
+        self.cards_csv_path = None if data_path == None else os.path.join(self.data_path, "cards" + ".csv")
+        
+        if json_path == None:
+            self.board = self.create_board()
+            self.players = self.create_players()
+            self.draw, self.discard = self.create_cards()
+        else:
+            self.load_from_json_path(json_path)
+            
+    def create_board(self):
+        return bg.Board() if self.board_json_path == None else bg.Board(json_path=self.board_json_path)
+    
+    def create_players(self):
+        if self.players_json_path == None:
+            print("NoPlayerPath")
+            return list()
+        jsoninator = bg.Jsoninator({"Player": ff.Player, "Marker": bg.Marker,
+                                    "Deck": bg.Deck, "Card": ff.Card,
+                                  })
+        with open(self.players_json_path, 'r') as json_file:
+            return json.load(json_file, object_hook=jsoninator.object_hook)
+        
+    def create_cards(self):
+        draw = bg.Deck("Draw")
+        discard = bg.Deck("Discard")
+        if self.cards_csv_path != None:
+            with open(self.cards_csv_path, newline='') as csv_file:
+                reader = csv.reader(csv_file)
+                for row in reader:
+                    if len(row) != 4:
+                        print("SkipCard(#)", len(row), row)
+                        count = 0
+                    else:
+                        count, level, shortcut, desc = row
+                        try:
+                            count = int(count)
+                            card = ff.Card(desc.strip(), int(level), int(shortcut))
+                            draw.add(card * count)
+                        except Exception as e:
+                            print("SkipCard(value)", len(row), row)
+                            print(e)
+                            count = 0
+        return draw, discard
+                
+                    
+    def __str__(self):
+        form = "Fafo: Board={} Players={} Cards={}"
+        return form.format(len(self.board), len(self.players), len(self.draw))
+        
+    def json_encode(self):
+        return {"__type__": "Game",
+                "Board":    self.board,
+                "Players":  self.players,
+                "Draw":     self.draw,
+                "Discard":  self.discard}
+        
+    # Note: this is a class function
+    def json_decode(json_dict):
+        game_dict = (json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Game")) else
+                     None)
+        if game_dict != None:
+            board   = game_dict["Board"]
+            players = game_dict["Players"]    
+            draw    = game_dict["Draw"]
+            discard = game_dict["Discard"]
+            game = Game()
+            game.board = board
+            game.players = players
+            game.draw = draw
+            game.discard = discard
+            return game
+        return json_dict
+    
+    def save_to_json_path(self, json_path=None):
+        jsoninator = bg.Jsoninator({"Game": Game,
+                                    "Board": bg.Board, "Space": bg.Space, "Point": bg.Point,
+                                    "Exit": bg.Exit, "Connection": bg.Connection,
+                                    "Card": ff.Card, "Deck": bg.Deck,
+                                    "Player": ff.Player, "Marker": bg.Marker
+                                  })
+        json_path = json_path if json_path != None else self.json_path
+        with open(json_path, 'w') as json_file:
+            json.dump(self, json_file, indent=2, sort_keys=False,
+                      default=jsoninator.default, ensure_ascii=True)
+            
+    # this is a class function and constructs a new Board
+    def load_from_json_path(self, json_path=None):
+        jsoninator = bg.Jsoninator({"Game": Game,
+                                    "Board": bg.Board, "Space": bg.Space, "Point": bg.Point,
+                                    "Exit": bg.Exit, "Connection": bg.Connection,
+                                    "Card": ff.Card, "Deck": bg.Deck,
+                                    "Player": ff.Player, "Marker": bg.Marker
+                                  })
+        json_path = json_path if json_path != None else self.json_path
+        try:
+            with open(json_path, 'r') as json_file:
+                json_data = json.load(json_file, object_hook=jsoninator.object_hook)
+            # if isinstance(json_data, dict):
+            #     self.board = json_data["Board"]
+            #     self.players = json_data["Players"]
+            #     self.hoard = json_data["Hoard"]
+            #     self.horde = json_data["Horde"]
+            #     self.decks = json_data["Decks"] if "Decks" in json_data else dict()
+            # else:
+            self.board = json_data.board
+            self.players = json_data.players
+            self.draw = json_data.draw
+            self.discard = json_data.discard
+        except Exception as e:
+            print("\nException (Game.load_from_json_path)", e)
+            pass
+
+    def from_json_path(json_path):
+        return Game(json_path=json_path)
+
+
+if __name__ == "__main__":
+    here = os.path.dirname(os.path.abspath(__file__))
+    game = Game("fafo", os.path.join(os.path.dirname(here), "data"))
+    #agents = [bg.Agent(player, game.board) for player in game.players]
+    print(game)
