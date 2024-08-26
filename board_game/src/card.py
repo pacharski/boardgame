@@ -35,11 +35,17 @@ class Card():
     
 class Deck():
     """A collection (list) of Cards with common components of the face and back"""
-    def __init__(self, name, cards=[], face=None, back=None):
+    def __init__(self, name, cards=None, face=None, back=None):
         self.name = name
-        self.cards = cards
+        self.cards = cards if cards != None else []
         self.face = face
         self.back = back
+
+    def add(self, cards):
+        if isinstance(cards, (list, tuple)):
+            self.cards.extend(cards)
+        else:
+            self.cards.append(card)
 
     def __iter__(self):
         for card in self.cards:
