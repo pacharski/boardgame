@@ -19,6 +19,12 @@ class Agent():
         self.board = game.board
         self.game = game
         
+    def turn(self):
+        action_list = self.move()
+        if action_list != None:
+            for action in action_list:
+                yield action
+        
     def move(self):
         """ figure out the possible move options for the player, and pick one"""
         """
@@ -66,11 +72,93 @@ class Agent():
             valid_options.extend(self.challenge_player(card))
 
     def move_ahead(self, card):
-        return []
+        """
+            Move forward or shortcut
+              Shortcut anytime on a shorcut space (begin, passing, end), can
+               take shortcut and end movement
+            Redefine connections/exits as Forward, Backward, Shortcut
+            End movement on Empty, Ambush, Player, End
+        """
+        options = []
+        count = card.value
+        moves = []
+        space: bg.Space = self.game.board.spaces[self.player.location]
+        for _ in range(count):
+            shortcuts = [exit for exit in space.exits if exit.barrier=="Shortcut"]
+            if len(shortcuts) > 0:
+                exit: bg.Exit = shortcuts[0]
+                option = [move for move in moves] # make a copy
+                option.append(("Shortcut", space.id, exit.destination))
+                options.append(option)
+            forwards = [exit for exit in space.exits if exit.barrier=="Forward"]
+            if len(forwards) > 0:
+                exit: bg.Exit = forwards[0]
+                moves.append(("Move", space.id, exit.destination))
+                space: bg.Space = self.game.board.spaces[exit.destination]
+        options.append(moves)
+        return options
     
     def challenge_player(self, card):
-        return []
+        """
+            If win challenge, go to forward from challengee space
+            If lose challenge, turn is over
+        """
+        challenges = []
+        players = [player for player in self.game.players if player != self.player]
+        for player in players:
+            challenges.append(("Challenge", player))
+        return challenges
     
+    def is_encounter(self, location):
+        space = self.board.spaces[location]
+        if ((space.name == "") or (location == 92) or (location == 93)):
+            return False
+        elif (space.name == "Room"):
+            if space.num_encounters == 0:
+                return True
+            adversary, rewards, assigned = space.encounters[0]
+            return (adversary != None)
+        else: # big room
+            return True
+    
+    def is_occupied(self, location):
+        # exclude self.player
+        space = self.board.spaces[location]
+        if (space.name != "") and (space.name != "Room"):
+            # Big room has no limit on number of players landing there
+            return False
+        occupied_locations = [player.location for player in self.players if player != self.player]
+        return location in occupied_locations
+    
+    def search_moves(self, player, location, last_exit, count, option, valid_options):
+        """recursive search to create a list of valid move options"""
+        encounter = (len(option) != 0) and self.is_encounter(location) # check board state
+        occupied = self.is_occupied(location) # check board state, exclude self.player
+        # if no more movement left, done moving
+        if count == 0:
+            if not occupied:
+                # check for secret doors
+                space = self.board.spaces[location]
+                secret_doors = [exit for exit in space.exits if exit.barrier == "Secret Door"]
+                if len(secret_doors) > 0:
+                    secret_door = random.choice(secret_doors)
+                    option.append(("SecretDoor", location, secret_door))
+                valid_options.append(option)
+            return valid_options
+        # if encounter (creature to fight)
+        if encounter:
+            if not occupied:
+                # need to resolve encounter
+                option.append(("Encounter", location, last_exit))
+                valid_options.append(option)
+            return valid_options
+        # there should always be at least one exit
+        for exit in self.board.spaces[location].exits:
+            exit_option = ("Move", location, exit)
+            new_option = option + [exit_option]
+            self.search_moves(player, exit.destination, exit, count-1, new_option, valid_options)
+        return valid_options
+   
     
 if __name__ == "__main__":
     game = ff.Game("fafo", os.path.join(os.path.dirname(here), "data"))

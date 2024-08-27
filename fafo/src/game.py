@@ -4,12 +4,12 @@ print('Running' if __name__ == '__main__' else
 
 import os
 import sys
-import json
-import csv
 
 here = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(here, "../.."))
 
+import json
+import csv
 import fafo as ff
 import board_game as bg
 
@@ -29,9 +29,11 @@ class Game():
             self.players = self.create_players()
             self.draw_pile, self.discard_pile = self.create_cards()
         else:
+            print("LoadBoard", json_path)
             self.load_from_json_path(json_path)
             
     def create_board(self):
+        print("CreateBoard", self.board_json_path)
         return bg.Board() if self.board_json_path == None else bg.Board(json_path=self.board_json_path)
     
     def create_players(self):
@@ -146,6 +148,7 @@ class Game():
 
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
+    print("Here", here)
     game = Game("fafo", os.path.join(os.path.dirname(here), "data"))
     #agents = [bg.Agent(player, game.board) for player in game.players]
     print(game)
