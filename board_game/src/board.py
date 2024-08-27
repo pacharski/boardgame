@@ -118,7 +118,7 @@ class Board():
             pass
 
     def from_json_path(json_path):
-        return Board(json_path)
+        return Board(json_path=json_path)
 
 
 if __name__ == "__main__":
@@ -130,23 +130,3 @@ if __name__ == "__main__":
     print("\n\n\nMainHere", here)
     json_path = os.path.join(here, "../../data/board.json")
     print(Board(json_path=json_path))
-
-#     here = os.path.abspath(__file__)
-#     json_path = os.path.join(os.path.dirname(here), "../../data/board.json" )
-
-#     board = Board(json_path)
-#     print("CWD", os.getcwd())
-#     temp_path = os.path.join(os.path.dirname(here), "board.json")
-#     board.save_to_json_path(temp_path)
-#     board1 = Board(temp_path)
-#     board2 = Board.from_json_path(temp_path)
-
-#     print(board1)
-#     assert len(board1.spaces) == len(board2.spaces)
-#     assert len(board1.spaces) == 419
-#     assert len(board1) == 419
-    
-#     print("Find(100,100)", board1.find_space(Point(100, 100)))
-#     assert board1.find_space(Point(100, 100))[0] == 333
-#     print("Find(200,100)", board1.find_space(Point(200, 100)))
-#     assert board1.find_space(Point(200, 100))[0] == 329
