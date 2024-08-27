@@ -3,9 +3,13 @@ print('Running' if __name__ == '__main__' else
       'Importing', Path(__file__).resolve())
 
 import os
+import sys
+
+here = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(here))
+
 import tkinter
 import random
-
 import a_game as ag
 import board_game as bg
 
@@ -190,6 +194,6 @@ class GamePlayer(ag.GameView):
 
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(here, "a_game/data")
+    data_path = os.path.join(here, "../a_game/data")
     gv = GamePlayer("a_game", data_path)
     gv.run()
