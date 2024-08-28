@@ -13,11 +13,11 @@ import fafo as ff
 import board_game as bg
 
 
-class GameViewer(ff.GameView):
+class GameViewer(bg.BoardView):
     def __init__(self, name, data_path):
         self.name = name
         self.data_path = data_path
-        game = ff.Game("fafo", data_path)
+        game = bg.Board(name="fafo", json_path=os.path.join(data_path, "fafo.json"))
 
         self.root = tkinter.Tk()
         self.root.title("Fafo")

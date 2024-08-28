@@ -27,6 +27,8 @@ class GamePlayer(ff.GameView):
                        for player in self.game.players if player.location != None]
         self.active_agent = -1
         self.active_actions = []
+
+        self.initial_draw()
         
         self.root = tkinter.Tk()
         self.root.title("Fafo Player")
@@ -48,6 +50,12 @@ class GamePlayer(ff.GameView):
     def apply_overlay(self, bbox):
         super().apply_overlay(bbox)
 
+    def initial_draw(self):
+        for agent in self.agents:
+            player = agent.player
+            while len(player.hand) < 3:
+                player.hand.add(self.game.draw())
+
     def play(self):
         if len(self.active_actions) == 0:
             self.active_agent = (self.active_agent + 1) % len(self.agents)
@@ -57,14 +65,34 @@ class GamePlayer(ff.GameView):
             action, self.active_actions = self.active_actions[0], self.active_actions[1:]
             if (action != None) and (len(action) > 0):
                 agent = self.agents[self.active_agent]
-                action, location, exit = action
+                action, arguments = action[0], action[1:]
                 if action == "Move":
+                    location, exit = arguments
                     if not self.move_player(agent.player, location, exit):
                         self.active_actions = []
+                if action == "Shortcut":
+                    location, exit = arguments
+                    self.move_player(agent.player, location, exit)
+                    self.active_actions = []
+                if action == "Challenge":
+                    other_player = arguments[0]
+                    self.challenge(agent.player, other_player)
+                    self.active_actions = []
+                if action == "Finished":
+                    location = arguments[0]
+                    self.finished(agent.player, location)
+                    self.active_actions = []
                 
-    def move_player(self, player, location, exit):
+    def move_player(self, player: ff.Player, location, exit: bg.Exit):
         player.location = exit.destination
         return True
+    
+    def challenge(self, challenger: ff.Player, challengee: ff.Player):
+        print("{} challenges {}".format(challenger.name, challengee.name))
+
+    def finished(self, player: ff.Player, location):
+        player.location = None
+        print("{} finished! {}".format(player.name, location))
 
     def update(self):
         self.play()
