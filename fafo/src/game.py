@@ -32,16 +32,13 @@ class Game():
             self.draw_pile, self.discard_pile = self.create_cards()
             random.shuffle(self.draw_pile)
         else:
-            print("LoadBoard", json_path)
             self.load_from_json_path(json_path)
             
     def create_board(self):
-        print("CreateBoard", self.board_json_path)
         return bg.Board() if self.board_json_path == None else bg.Board(json_path=self.board_json_path)
     
     def create_players(self):
         if self.players_json_path == None:
-            print("NoPlayerPath")
             return list()
         jsoninator = bg.Jsoninator({"Player": ff.Player, "Marker": bg.Marker,
                                     "Deck": bg.Deck, "Card": ff.Card,
@@ -57,7 +54,7 @@ class Game():
                 reader = csv.reader(csv_file)
                 for row in reader:
                     if len(row) != 4:
-                        print("SkipCard(#)", len(row), row)
+                        # print("SkipCard(#)", len(row), row)
                         count = 0
                     else:
                         count, level, shortcut, desc = row
@@ -66,8 +63,8 @@ class Game():
                             card = ff.Card(desc.strip(), int(level), int(shortcut))
                             draw.add(card * count)
                         except Exception as e:
-                            print("SkipCard(value)", len(row), row)
-                            print(e)
+                            # print("SkipCard(value)", len(row), row)
+                            # print(e)
                             count = 0
         return draw, discard
     
@@ -80,7 +77,7 @@ class Game():
     def draw(self):
         if len(self.draw_pile) == 0:
             self.restock()
-        print("DrawPile", len(self.draw_pile))
+        # print("DrawPile", len(self.draw_pile))
         return self.draw_pile.draw() if len(self.draw_pile) > 0 else None
 
     def discard(self, card):

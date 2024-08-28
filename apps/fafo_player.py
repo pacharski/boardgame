@@ -102,17 +102,11 @@ class GamePlayer(ff.GameView):
         challengee_card: ff.Card = challengee.hand.draw(remove=True)
         self.game.discard_pile.add(challengee_card)
         challengee.hand.add(self.game.draw())
-        print("{} {} challenges {} {}".format(
-              challenger.name, challenger_card.name, 
-              challengee.name, challengee_card.name))
         if challenger_card.value >= challengee_card.value:
-            print(challenger.name, "wins!")
             forwards = self.game.forward_exits_for_location(challengee.location)
             if len(forwards) > 0:
                 challenger.location = random.choice(forwards).destination
-        else:
-            print(challengee.name, "successfully defends!")
-
+        
     def finished(self, player: ff.Player, location):
         player.location = None
         print("{} finished! {}".format(player.name, location))

@@ -21,7 +21,7 @@ class Agent():
         
     def turn(self):
         action_list = self.move()
-        print("Turn", self.player.name, len(action_list))
+        # print("Turn", self.player.name, len(action_list))
         if action_list != None:
             for action in action_list:
                 yield action
@@ -31,7 +31,7 @@ class Agent():
         while len(self.player.hand) < 4:
             new_card = self.game.draw()
             self.player.hand.add(new_card)
-            print(self.player.name, "draw", new_card, len(self.player.hand))
+            # print(self.player.name, "draw", new_card, len(self.player.hand))
 
     def move(self):
         """ figure out the possible move options for the player, and pick one"""
@@ -83,6 +83,7 @@ class Agent():
         return option
         
     def move_ahead(self, count, card, space, moves=None, options=None):
+        # print("MoveAhead", space.id, space.name)
         """
         Move forward or shortcut
             Shortcut anytime on a shorcut space (begin, passing, end), can
@@ -102,6 +103,7 @@ class Agent():
         exits = [exit for exit in space.exits
                  if (exit.barrier in ("Shortcut", "Forward"))]
         if len(exits) == 0: 
+            # print(self.player.name, "Finished in space", space.id, space.name)
             moves.append(("Finished", space.id))
             options.append(moves[:])
             return
@@ -110,14 +112,17 @@ class Agent():
             moves_copy = moves[:]
             if exit.barrier == "Shortcut":
                 # check if shortcut can be taken (card level, hero)
-                moves_copy.append(("Shortcut", space.id, exit))
-                space: bg.Space = self.game.board.spaces[exit.destination]
-                self.move_ahead(0, card, space, moves_copy, options)
+                if card.name in [name.strip() for name in space.name.split(',')]:
+                    moves_copy.append(("Shortcut", space.id, exit))
+                    self.move_ahead(0, card, 
+                                    self.game.board.spaces[exit.destination],
+                                    moves_copy, options)
             else:
                 moves_copy.append(("Move", space.id, exit))
-                space: bg.Space = self.game.board.spaces[exit.destination]
-                self.move_ahead(count-1, card, space, moves_copy, options)
-    
+                self.move_ahead(count-1, card, 
+                                self.game.board.spaces[exit.destination],
+                                moves_copy, options)
+                
     def challenge_player(self, card: ff.Card, options):
         """
             If win challenge, go to forward from challengee space
