@@ -66,6 +66,9 @@ class GamePlayer(ff.GameView):
             if (action != None) and (len(action) > 0):
                 agent = self.agents[self.active_agent]
                 action, arguments = action[0], action[1:]
+                if action == "Discard":
+                    card = arguments[0]
+                    self.discard(agent.player, card)
                 if action == "Move":
                     location, exit = arguments
                     if not self.move_player(agent.player, location, exit):
@@ -83,6 +86,11 @@ class GamePlayer(ff.GameView):
                     self.finished(agent.player, location)
                     self.active_actions = []
                 
+    def discard(self, player: ff.Player, card: bg.Card):
+        player.hand.remove(card)
+        self.game.discard_pile.add(card)
+        return True
+    
     def move_player(self, player: ff.Player, location, exit: bg.Exit):
         player.location = exit.destination
         return True

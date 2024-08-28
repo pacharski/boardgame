@@ -53,6 +53,9 @@ class Deck():
             return self.cards.pop() if len(self.cards) > 0 else None
         return self.cards[0]
     
+    def remove(self, card):
+        self.cards.remove(card)
+        
     def shuffle(self):
         if self.cards != None:
             random.shuffle(self.cards)
