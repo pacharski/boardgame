@@ -10,6 +10,7 @@ sys.path.append(os.path.join(here, "../.."))
 
 import json
 import csv
+import random
 import fafo as ff
 import board_game as bg
 
@@ -28,6 +29,7 @@ class Game():
             self.board = self.create_board()
             self.players = self.create_players()
             self.draw_pile, self.discard_pile = self.create_cards()
+            random.shuffle(self.draw_pile)
         else:
             print("LoadBoard", json_path)
             self.load_from_json_path(json_path)
@@ -77,6 +79,7 @@ class Game():
     def draw(self):
         if len(self.draw_pile) == 0:
             self.restock()
+        print("DrawPile", len(self.draw_pile))
         return self.draw_pile.draw() if len(self.draw_pile) > 0 else None
 
     def discard(self, card):

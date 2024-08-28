@@ -21,6 +21,7 @@ class Agent():
         
     def turn(self):
         action_list = self.move()
+        print("Turn", self.player.name, len(action_list))
         if action_list != None:
             for action in action_list:
                 yield action
@@ -63,13 +64,19 @@ class Agent():
                 Need exact count to end???
         """
         # Draw a card, and pick one of the four cards to either move, or challenge a player
-        new_card = self.game.draw()
-        self.player.hand.add(new_card)
+        while len(self.player.hand) < 4:
+            new_card = self.game.draw()
+            self.player.hand.add(new_card)
+            print(self.player.name, "draw", new_card, len(self.player.hand))
 
         valid_options = []
         for card in self.player.hand:
             valid_options.extend(self.move_ahead(card))
-            valid_options.extend(self.challenge_player(card))
+            #valid_options.extend(self.challenge_player(card))
+        if len(valid_options) > 0:
+            option = random.choice(valid_options)
+            return option
+        return []
 
     def move_ahead(self, card):
         """
@@ -79,22 +86,31 @@ class Agent():
             Redefine connections/exits as Forward, Backward, Shortcut
             End movement on Empty, Ambush, Player, End
         """
-        options = []
-        count = card.value
-        moves = []
+        options = []  # move forward and moves with shortcuts
+        if self.player.location == None:
+            return options
+        moves = []    # all of the move steps for this turn
+        moves.append(("Discard", card))
         space: bg.Space = self.game.board.spaces[self.player.location]
-        for _ in range(count):
+        for _ in range(card.value):
+            # if there are any shortcuts, create a new option with moves to this
+            #  point and add the shortcut.  Save the shortcut options in options
             shortcuts = [exit for exit in space.exits if exit.barrier=="Shortcut"]
-            if len(shortcuts) > 0:
+            if len(shortcuts) > 0:  # there should be only zero or one per space
                 exit: bg.Exit = shortcuts[0]
-                option = [move for move in moves] # make a copy
-                option.append(("Shortcut", space.id, exit.destination))
-                options.append(option)
+                shortcut_option = [move for move in moves] # make a copy
+                shortcut_option.append(("Shortcut", space.id, exit))
+                options.append(shortcut_option)
+            # record all forward move until the move count runs out in moves
             forwards = [exit for exit in space.exits if exit.barrier=="Forward"]
-            if len(forwards) > 0:
+            if len(forwards) > 0: # there should be only one forward move per space
                 exit: bg.Exit = forwards[0]
-                moves.append(("Move", space.id, exit.destination))
+                moves.append(("Move", space.id, exit))
                 space: bg.Space = self.game.board.spaces[exit.destination]
+            forwards = [exit for exit in space.exits if exit.barrier=="Forward"]
+            if len(forwards) == 0: 
+                moves.append(("Finished", space.id))
+                break
         options.append(moves)
         return options
     
@@ -104,9 +120,10 @@ class Agent():
             If lose challenge, turn is over
         """
         challenges = []
-        players = [player for player in self.game.players if player != self.player]
+        players = [player for player in self.game.players 
+                   if ((player != self.player) and (player.location != None))]
         for player in players:
-            challenges.append(("Challenge", player))
+            challenges.append([("DrawCard", card), ("Challenge", player)])
         return challenges
     
     def is_encounter(self, location):
