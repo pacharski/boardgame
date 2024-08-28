@@ -24,7 +24,8 @@ class Game():
         self.board_json_path = None if data_path == None else os.path.join(self.data_path, self.name + ".json")
         self.players_json_path = None if data_path == None else os.path.join(self.data_path, "players" + ".json")
         self.cards_csv_path = None if data_path == None else os.path.join(self.data_path, "cards" + ".csv")
-        
+        self.winner = None
+
         if json_path == None:
             self.board = self.create_board()
             self.players = self.create_players()
@@ -83,7 +84,17 @@ class Game():
         return self.draw_pile.draw() if len(self.draw_pile) > 0 else None
 
     def discard(self, card):
-        self.discard_pile.add(card)        
+        self.discard_pile.add(card)    
+
+    def forward_exits_for_location(self, location):
+        forwards = [exit for exit in self.board.spaces[location].exits
+                    if exit.barrier == "Forward"]
+        return forwards    
+                    
+    def backward_exits_for_location(self, location):
+        backwards = [exit for exit in self.board.spaces[location]
+                     if exit.barrier == "Backward"]
+        return backwards    
                     
     def __str__(self):
         form = "Fafo: Board={} Players={} Cards={}"

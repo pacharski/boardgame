@@ -78,13 +78,14 @@ class GamePlayer(ff.GameView):
                     self.move_player(agent.player, location, exit)
                     self.active_actions = []
                 if action == "Challenge":
-                    other_player = arguments[0]
-                    self.challenge(agent.player, other_player)
+                    card, other_player = arguments
+                    self.challenge(agent.player, card, other_player)
                     self.active_actions = []
                 if action == "Finished":
                     location = arguments[0]
                     self.finished(agent.player, location)
                     self.active_actions = []
+                    self.game.winner = agent.player
                 
     def discard(self, player: ff.Player, card: bg.Card):
         player.hand.remove(card)
@@ -95,17 +96,32 @@ class GamePlayer(ff.GameView):
         player.location = exit.destination
         return True
     
-    def challenge(self, challenger: ff.Player, challengee: ff.Player):
-        print("{} challenges {}".format(challenger.name, challengee.name))
+    def challenge(self, challenger: ff.Player, challenger_card: ff.Card, 
+                  challengee: ff.Player,
+                 ):
+        challengee_card: ff.Card = challengee.hand.draw(remove=True)
+        self.game.discard_pile.add(challengee_card)
+        challengee.hand.add(self.game.draw())
+        print("{} {} challenges {} {}".format(
+              challenger.name, challenger_card.name, 
+              challengee.name, challengee_card.name))
+        if challenger_card.value >= challengee_card.value:
+            print(challenger.name, "wins!")
+            forwards = self.game.forward_exits_for_location(challengee.location)
+            if len(forwards) > 0:
+                challenger.location = random.choice(forwards).destination
+        else:
+            print(challengee.name, "successfully defends!")
 
     def finished(self, player: ff.Player, location):
         player.location = None
         print("{} finished! {}".format(player.name, location))
 
     def update(self):
-        self.play()
-        self.resize()
-        self.root.after(150, self.update)  # call update again after 1/2 second
+        if self.game.winner == None:
+            self.play()
+            self.resize()
+            self.root.after(150, self.update)  # call update again after 1/2 second
 
     def run(self):
         self.update()
