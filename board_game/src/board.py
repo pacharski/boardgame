@@ -96,7 +96,7 @@ class Board():
     # this is a class function and constructs a new Board
     def load_from_json_path(self, json_path=None):
         jsoninator = bg.Jsoninator({"Board": Board, "Space": bg.Space,
-                                   "Point": bg.Point, "Path": Path, "Exit": bg.Exit})    
+                                    "Point": bg.Point, "Path": Path, "Exit": bg.Exit})    
         json_path = json_path if json_path != None else self.json_path
         try:
             with open(json_path, 'r') as json_file:

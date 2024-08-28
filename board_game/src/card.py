@@ -61,6 +61,12 @@ class Deck():
         for card in self.cards:
             yield card
 
+    def __getitem__(self, index):
+        return self.cards[index]
+    
+    def __setitem__(self, index, value):
+        self.cards[index] = value
+
     def __len__(self):
         return len(self.cards)
 
