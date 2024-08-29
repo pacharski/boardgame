@@ -55,6 +55,9 @@ class Deck():
     
     def remove(self, card):
         self.cards.remove(card)
+
+    def remove_all(self):
+        self.cards = []
         
     def shuffle(self):
         if self.cards != None:

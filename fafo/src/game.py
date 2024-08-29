@@ -81,7 +81,8 @@ class Game():
         return self.draw_pile.draw() if len(self.draw_pile) > 0 else None
 
     def discard(self, card):
-        self.discard_pile.add(card)    
+        self.discard_pile.add(card)  
+        return card  
 
     def forward_exits_for_location(self, location):
         forwards = [exit for exit in self.board.spaces[location].exits

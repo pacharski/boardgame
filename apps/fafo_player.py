@@ -60,15 +60,18 @@ class GamePlayer(ff.GameView):
         if len(self.active_actions) == 0:
             self.active_agent = (self.active_agent + 1) % len(self.agents)
             agent = self.agents[self.active_agent]
+            #print("NewAgent", agent.player.name)
             self.active_actions = [action for action in agent.turn()]
         if len(self.active_actions) > 0:
             action, self.active_actions = self.active_actions[0], self.active_actions[1:]
             if (action != None) and (len(action) > 0):
                 agent = self.agents[self.active_agent]
                 action, arguments = action[0], action[1:]
+                #print(agent.player.name, "Action", action)
                 if action == "Discard":
                     card = arguments[0]
                     self.discard(agent.player, card)
+                    #print(agent.player.name, "Discard", card.name, len(agent.player.hand))
                 if action == "Move":
                     location, exit = arguments
                     if not self.move_player(agent.player, location, exit):
@@ -86,7 +89,55 @@ class GamePlayer(ff.GameView):
                     self.finished(agent.player, location)
                     self.active_actions = []
                     self.game.winner = agent.player
+            if len(self.active_actions) == 0:
+                # end of player move.
+                agent = self.agents[self.active_agent]
+                space = self.game.board.spaces[agent.player.location]
+                if space.level == 1:
+                    # Ambush
+                    print("Ambush", space.name, space.id)
+                    self.ambush_space(agent, space)
+                else:
+                    others = [player for player in self.players_at_location(agent.player.location)
+                              if player != agent.player]
+                    other_player = random.choice(others) if len(others) > 0 else None
+                    if other_player != None:
+                        self.share_space(agent.player, other_player)
+
+    def ambush_space(self, agent: ff.Agent, space: bg.Space):
+        # draw a card from players hand, and replace with one from draw_pile
+        # draw a card from the draw_pile
+        # if player >= monster, win, move forward player card value
+        # else lost, move backward monster card value
+        # Turn ends after an ambush (no second ambush or card share)
+        player = agent.player
+        player_card = self.game.discard(player.hand.draw())
+        agent.player.hand.add(self.game.draw())
+        monster_card = self.game.discard(self.game.draw())
+        if player_card.value >= monster_card.value:
+            print(player.name, "survives ambush by", monster_card.name)
+            # move forward player_card.value spaces
+        else:
+            print(player.name, "hurt in ambush by", monster_card.name)
+            # Move back monster_card.value spaces
+        
+    def share_space(self, player, other_player):
+        all_cards = [*player.hand, *other_player.hand]
+        player.hand.remove_all()
+        other_player.hand.remove_all()
+        if len(all_cards) != 6:
+            print("UhOh!  Somebody does not have three cards")
+            exit()
+        random.shuffle(all_cards)
+        for card in all_cards[:3]:
+            player.hand.add(card)
+        for card in all_cards[3:]:
+            other_player.hand.add(card)
                 
+    def players_at_location(self, location):
+        return[agent.player for agent in self.agents
+               if agent.player.location == location]
+            
     def discard(self, player: ff.Player, card: bg.Card):
         player.hand.remove(card)
         self.game.discard_pile.add(card)

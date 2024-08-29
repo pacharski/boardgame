@@ -82,7 +82,7 @@ class Agent():
         option = (random.choice(valid_options) if len(valid_options) > 0 else [])
         return option
         
-    def move_ahead(self, count, card, space, moves=None, options=None):
+    def move_ahead(self, count, card, space, in_moves=None, options=None):
         # print("MoveAhead", space.id, space.name)
         """
         Move forward or shortcut
@@ -94,18 +94,19 @@ class Agent():
         options = options if options != None else []
         if self.player.location == None:
             return options
-        moves = moves if moves != None else [("Discard", card)]
+        moves = in_moves[:] if in_moves != None else [("Discard", card)]
 
         if count == 0:
-            options.append(moves[:])  # add a copy of moves to the list of options
+            options.append(moves)  # add a copy of moves to the list of options
             return 
         
         exits = [exit for exit in space.exits
                  if (exit.barrier in ("Shortcut", "Forward"))]
         if len(exits) == 0: 
             # print(self.player.name, "Finished in space", space.id, space.name)
+            moves.append(("Discard", card))
             moves.append(("Finished", space.id))
-            options.append(moves[:])
+            options.append(moves)
             return
         
         for exit in exits:
@@ -132,7 +133,9 @@ class Agent():
                    if ((player != self.player) and (player.location != None))]
         for player in players:
             options.append([("DrawCard", card), 
-                            ("Challenge", card, player)])
+                            ("Discard", card),
+                            ("Challenge", card, player)
+                          ])
         return 
     
     def is_encounter(self, location):
