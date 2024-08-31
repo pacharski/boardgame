@@ -74,14 +74,19 @@ class Game():
         self.draw_pile.shuffle()
         self.discard_pile = bg.Deck("Discard")
     
-    def draw(self):
+    def draw(self, name="someone"):
         if len(self.draw_pile) == 0:
             self.restock()
         # print("DrawPile", len(self.draw_pile))
-        return self.draw_pile.draw() if len(self.draw_pile) > 0 else None
+        card = self.draw_pile.draw() if len(self.draw_pile) > 0 else None
+        # print(name, "draws", (card.name if card != None else card),
+        #       len(self.draw_pile), len(self.discard_pile))
+        return card
 
-    def discard(self, card):
+    def discard(self, card, name="someone"):
         self.discard_pile.add(card)  
+        # print(name, "discarded", card.name, 
+        #       len(self.draw_pile), len(self.discard_pile))
         return card  
 
     def forward_exits_for_location(self, location):

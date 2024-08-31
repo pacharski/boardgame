@@ -57,21 +57,23 @@ class GamePlayer(ff.GameView):
                 player.hand.add(self.game.draw())
 
     def play(self):
+        ambushed = False
         if len(self.active_actions) == 0:
             self.active_agent = (self.active_agent + 1) % len(self.agents)
             agent = self.agents[self.active_agent]
-            #print("NewAgent", agent.player.name)
+            # print("NewAgent", agent.player.name)
             self.active_actions = [action for action in agent.turn()]
+            ambushed = False
         if len(self.active_actions) > 0:
             action, self.active_actions = self.active_actions[0], self.active_actions[1:]
             if (action != None) and (len(action) > 0):
                 agent = self.agents[self.active_agent]
                 action, arguments = action[0], action[1:]
-                #print(agent.player.name, "Action", action)
-                if action == "Discard":
+                # print(agent.player.name, "Action", action)
+                if (action == "Discard") and not ambushed:
                     card = arguments[0]
                     self.discard(agent.player, card)
-                    #print(agent.player.name, "Discard", card.name, len(agent.player.hand))
+                    # print(agent.player.name, "Discard", card.name, len(agent.player.hand))
                 if action == "Move":
                     location, exit = arguments
                     if not self.move_player(agent.player, location, exit):
@@ -92,17 +94,20 @@ class GamePlayer(ff.GameView):
             if len(self.active_actions) == 0:
                 # end of player move.
                 agent = self.agents[self.active_agent]
-                space = self.game.board.spaces[agent.player.location]
-                if space.level == 1:
-                    # Ambush
-                    print("Ambush", space.name, space.id)
-                    self.ambush_space(agent, space)
-                else:
-                    others = [player for player in self.players_at_location(agent.player.location)
-                              if player != agent.player]
-                    other_player = random.choice(others) if len(others) > 0 else None
-                    if other_player != None:
-                        self.share_space(agent.player, other_player)
+                space = self.game.board.spaces[agent.player.location] if agent.player.location != None else None
+                # if player was already ambushed turn ends no matter where they land
+                if (space != None) and not ambushed:
+                    if (space.level == 1):
+                        # Ambush
+                        player_card, monster_card = self.ambush_space(agent, space)
+                        self.active_actions = [action for action in agent.turn(player_card)]
+                        ambushed = True
+                    else:
+                        others = [player for player in self.players_at_location(agent.player.location)
+                                if player != agent.player]
+                        other_player = random.choice(others) if len(others) > 0 else None
+                        if other_player != None:
+                            self.share_space(agent.player, other_player)
 
     def ambush_space(self, agent: ff.Agent, space: bg.Space):
         # draw a card from players hand, and replace with one from draw_pile
@@ -111,22 +116,30 @@ class GamePlayer(ff.GameView):
         # else lost, move backward monster card value
         # Turn ends after an ambush (no second ambush or card share)
         player = agent.player
-        player_card = self.game.discard(player.hand.draw())
-        agent.player.hand.add(self.game.draw())
-        monster_card = self.game.discard(self.game.draw())
+        player_card = self.game.discard(player.hand.draw(), name=player.name)
+        agent.player.hand.add(self.game.draw(name=player.name))
+        monster_card = self.game.discard(self.game.draw(name="monster"), name="monster")
         if player_card.value >= monster_card.value:
             print(player.name, "survives ambush by", monster_card.name)
             # move forward player_card.value spaces
+            # agent.moves(shortcuts=False, Challenges=False)
         else:
             print(player.name, "hurt in ambush by", monster_card.name)
             # Move back monster_card.value spaces
+        return player_card, monster_card
         
     def share_space(self, player, other_player):
         all_cards = [*player.hand, *other_player.hand]
+        print("ShareCards", 
+              player.name, len(player.hand), 
+              other_player.name, len(other_player.hand))
+            
         player.hand.remove_all()
         other_player.hand.remove_all()
         if len(all_cards) != 6:
-            print("UhOh!  Somebody does not have three cards")
+            print("UhOh!  Somebody does not have three cards", 
+                  player.name, len(player.hand), 
+                  other_player.name, len(other_player.hand))
             exit()
         random.shuffle(all_cards)
         for card in all_cards[:3]:
@@ -140,7 +153,7 @@ class GamePlayer(ff.GameView):
             
     def discard(self, player: ff.Player, card: bg.Card):
         player.hand.remove(card)
-        self.game.discard_pile.add(card)
+        self.game.discard(card, name=player.name)
         return True
     
     def move_player(self, player: ff.Player, location, exit: bg.Exit):
@@ -151,8 +164,9 @@ class GamePlayer(ff.GameView):
                   challengee: ff.Player,
                  ):
         challengee_card: ff.Card = challengee.hand.draw(remove=True)
-        self.game.discard_pile.add(challengee_card)
-        challengee.hand.add(self.game.draw())
+        self.game.discard(challengee_card, name=challengee.name)
+        challengee.hand.add(self.game.draw(name=challengee.name))
+        print(challenger.name, "challenges", challengee.name)
         if challenger_card.value >= challengee_card.value:
             forwards = self.game.forward_exits_for_location(challengee.location)
             if len(forwards) > 0:
