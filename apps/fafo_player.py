@@ -19,6 +19,7 @@ class GamePlayer(ff.GameView):
         self.name = name
         self.data_path = data_path
         self.game = ff.Game(self.name, self.data_path)
+        self.winner = None
 
         # disable all but 4 players
         for pid in range(4, len(self.game.players)):
@@ -56,60 +57,64 @@ class GamePlayer(ff.GameView):
             while len(player.hand) < 3:
                 player.hand.add(self.game.draw())
 
+    def print_action_summary(self, agent, actions):
+        # print summary of move selected for player
+        card, destination, challengee = None, None, None
+        for action in actions:
+            if action.action == "Discard":
+                card = action.card.name
+            elif action.action == "Move":
+                destination = action.location
+            elif action.action == "Challenge":
+                challengee = action.other_player.name
+        if destination != None:
+            print(agent.player.name, card, "move", destination)
+        elif challengee != None:
+            print(agent.player.name, card, "challenge", challengee)
+        else:
+            print(agent.player.name, card, "unknown")
+
     def play(self):
-        ambushed = False
         if len(self.active_actions) == 0:
+            # Next player
+            if self.winner != None:
+                return
             self.active_agent = (self.active_agent + 1) % len(self.agents)
             agent = self.agents[self.active_agent]
-            # print("NewAgent", agent.player.name)
-            self.active_actions = [action for action in agent.turn()]
-            ambushed = False
+            self.active_actions = agent.choose_action()
+            self.print_action_summary(agent, self.active_actions)
         if len(self.active_actions) > 0:
             action, self.active_actions = self.active_actions[0], self.active_actions[1:]
-            if (action != None) and (len(action) > 0):
+            if (action != None):
                 agent = self.agents[self.active_agent]
-                action, arguments = action[0], action[1:]
-                # print(agent.player.name, "Action", action)
-                if (action == "Discard") and not ambushed:
-                    card = arguments[0]
-                    self.discard(agent.player, card)
-                    # print(agent.player.name, "Discard", card.name, len(agent.player.hand))
-                if action == "Move":
-                    location, exit = arguments
-                    if not self.move_player(agent.player, location, exit):
+                if (action.action == "Discard"):
+                    # print(action.player.name, "discard", action.card.name)
+                    self.discard(agent.player, action.card)
+                elif action.action == "Move":
+                    if not self.move_player(agent.player, action.location):
+                        self.finished(agent.player, action.location)
                         self.active_actions = []
-                if action == "Shortcut":
-                    location, exit = arguments
-                    self.move_player(agent.player, location, exit)
-                    self.active_actions = []
-                if action == "Challenge":
-                    card, other_player = arguments
-                    self.challenge(agent.player, card, other_player)
-                    self.active_actions = []
-                if action == "Finished":
-                    location = arguments[0]
-                    self.finished(agent.player, location)
-                    self.active_actions = []
-                    self.game.winner = agent.player
+                elif action == "Challenge":
+                    self.challenge(agent.player, action.card, action.other_player)
             if len(self.active_actions) == 0:
                 # end of player move.
                 agent = self.agents[self.active_agent]
                 space = self.game.board.spaces[agent.player.location] if agent.player.location != None else None
                 # if player was already ambushed turn ends no matter where they land
-                if (space != None) and not ambushed:
+                if (space != None):
                     if (space.level == 1):
                         # Ambush
-                        player_card, monster_card = self.ambush_space(agent, space)
-                        self.active_actions = [action for action in agent.turn(player_card)]
-                        ambushed = True
+                        self.active_actions = self.ambush(agent, space)
+                        self.print_action_summary(agent, self.active_actions)
                     else:
+                        # FIXME make randomness into a 'choice' function
                         others = [player for player in self.players_at_location(agent.player.location)
                                 if player != agent.player]
                         other_player = random.choice(others) if len(others) > 0 else None
                         if other_player != None:
                             self.share_space(agent.player, other_player)
 
-    def ambush_space(self, agent: ff.Agent, space: bg.Space):
+    def ambush(self, agent: ff.Agent, space: bg.Space):
         # draw a card from players hand, and replace with one from draw_pile
         # draw a card from the draw_pile
         # if player >= monster, win, move forward player card value
@@ -121,12 +126,12 @@ class GamePlayer(ff.GameView):
         monster_card = self.game.discard(self.game.draw(name="monster"), name="monster")
         if player_card.value >= monster_card.value:
             print(player.name, "survives ambush by", monster_card.name)
-            # move forward player_card.value spaces
-            # agent.moves(shortcuts=False, Challenges=False)
+            return [action for action 
+                    in agent.choose_action_after_ambush_win(player_card)]
         else:
             print(player.name, "hurt in ambush by", monster_card.name)
-            # Move back monster_card.value spaces
-        return player_card, monster_card
+            return [action for action 
+                    in agent.choose_action_after_ambush_loss(player_card)]                            
         
     def share_space(self, player, other_player):
         all_cards = [*player.hand, *other_player.hand]
@@ -156,9 +161,9 @@ class GamePlayer(ff.GameView):
         self.game.discard(card, name=player.name)
         return True
     
-    def move_player(self, player: ff.Player, location, exit: bg.Exit):
-        player.location = exit.destination
-        return True
+    def move_player(self, player: ff.Player, destination: int):
+        player.location = destination
+        return len(self.game.forward_exits_for_location(destination)) > 0
     
     def challenge(self, challenger: ff.Player, challenger_card: ff.Card, 
                   challengee: ff.Player,
@@ -174,6 +179,7 @@ class GamePlayer(ff.GameView):
         
     def finished(self, player: ff.Player, location):
         player.location = None
+        self.winner = player
         print("{} finished! {}".format(player.name, location))
 
     def update(self):

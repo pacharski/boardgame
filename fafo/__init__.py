@@ -7,7 +7,7 @@ import sys
 here = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(here)
 
-from fafo.src.game import Game
+from fafo.src.game import GameAction, Game
 from fafo.src.player import Player
 from fafo.src.card import Card
 from fafo.src.agent import Agent

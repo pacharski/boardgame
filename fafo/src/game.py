@@ -15,6 +15,34 @@ import fafo as ff
 import board_game as bg
 
 
+class GameAction():
+    def __init__(self, player, card, action, 
+                 location=None, other_player=None):
+        self.player = player
+        self.action = action
+        self.card = card
+        self.location = location
+        self.other_player = other_player
+        
+    def __str__(self):
+        if self.action == "Move":
+            form = "{player} at {here} using {card} move to {there}"
+            return form.format(player=self.player.name, 
+                               here=self.player.location,
+                               card=self.card.name, 
+                               there=self.location)
+        elif self.action == "Challenge":
+            form = "{player} at {here} using {card} to challenge {other_player} at {there}"
+            return form.format(player=self.player.name, here=self.player.location,
+                               card=self.card.name,
+                               other_player=self.other_player.name, 
+                               there=self.other_player.location)
+        else:
+            form = "{player} using {card} to {action} for {location}"
+            return form.format(player=self.player.name, card=self.card.name, 
+                               action=self.action, location=self.location)
+    
+
 class Game(): 
     def __init__(self, name=None, data_path=None, json_path=None):
         self.name = name if name != None else "fafo"
@@ -88,7 +116,11 @@ class Game():
         # print(name, "discarded", card.name, 
         #       len(self.draw_pile), len(self.discard_pile))
         return card  
-
+    
+    def exit_available(self, exit, card, space):
+        return ((exit.barrier != "Shortcut")
+             or (card.name in [name.strip() for name in space.name.split(',')]))
+                
     def forward_exits_for_location(self, location):
         forwards = [exit for exit in self.board.spaces[location].exits
                     if exit.barrier == "Forward"]
@@ -97,7 +129,10 @@ class Game():
     def backward_exits_for_location(self, location):
         backwards = [exit for exit in self.board.spaces[location]
                      if exit.barrier == "Backward"]
-        return backwards    
+        return backwards  
+
+    def space_at_location(self, location: int):
+        return self.board.spaces[location] if location != None else None  
                     
     def __str__(self):
         form = "Fafo: Board={} Players={} Cards={}"

@@ -19,129 +19,81 @@ class Agent():
         self.board = game.board
         self.game = game
         
-    def turn(self, card=None):
-        action_list = self.move(card)
-        if action_list != None:
-            for action in action_list:
-                yield action
-        
-    def draw_cards(self, use_card):
-        # Replenish hand to 3, plus a new card for the turn
-        hand_cards = 3 if use_card != None else 4
-        while len(self.player.hand) < hand_cards:
-            new_card = self.game.draw(name=self.player.name)
-            self.player.hand.add(new_card)
-            # print(self.player.name, "draw", new_card, len(self.player.hand))
-
-    def move(self, use_card=None):
-        """ figure out the possible move options for the player, and pick one"""
+    def choose_action(self):
+        """ Return one turn action: 
+              Draw a card, Play a card, move or challenge using that card
         """
-            draw pile - shuffle all monster cards and here cords (heros have value 8)
-            heros allow matching here shortcut to be used (matches color, 1990 board has
-             hero picture instead of star, these are the dupicate color shortcuts on the 
-             82 board)
-
-            draw card (should have 3 already)
-            play card or challenge opponent
-            play card:
-                move spaces using value of card (1-7)
-                Ending on red circle, ambush:
-                    select card from hand
-                    draw card
-                    if select value (1-7) >= draw value:
-                        move forward value of select
-                    else
-                        move backward value of draw
-                    both cards are discarded
-                Starting on, Passing over or onto a space with matching star color (shortcut)
-                    Player can (may) take the shortcut if they played a card with the same color
-                    This is all of players movement (end movement at destination end of shortcut)
-            Challenge
-                Select another player
-                Both place card from hand face down
-                If challenger card >= challenged
-                    challenger moves to space in front of challenged
-                else
-                    end of turn
-                cards are discarded, and players draw a new card to replace them
-            Landing (end of turn) on space with another player
-                combine cards from both hands, and select 3 to keep, return the rest to the other player
-
-            Reach end to win
-                Need exact count to end???
-        """
-        if self.player.location == None:
-            return []
-        self.draw_cards(use_card)
-        # figure out all of the possible move/challenge options for this turn
-        space: bg.Space = self.game.board.spaces[self.player.location]
-        valid_options = []
-        card_options = self.player.hand if use_card == None else [use_card]
-        for card in card_options:
-            self.move_ahead(card.value, card, space, None, valid_options, 
-                            ambushed=(use_card != None))
-            if not use_card:
-                self.challenge_player(card, valid_options)
-        option = (random.choice(valid_options) if len(valid_options) > 0 else [])
-        return option
+        # Enumerate all possible card draws and actions, then pick one
+        self.player.hand.add(self.game.draw()) # should have 4 cards now
+        space = self.game.space_at_location(self.player.location)
+        exit_types = ("Forward", "Shortcut")
+        action_choices = []
+        for card in self.player.hand:
+            discard_action = ff.GameAction(self.player, card, "Discard")
+            move_choices = self.move_choices(space, card.value, card, exit_types)
+            action_choices.extend([[discard_action] + m for m in move_choices])
+            #action_choices.extend(self.challenge_player(card))
+        return random.choice(action_choices) if (len(action_choices) > 0) else []
         
-    def move_ahead(self, count, card, space, in_moves=None, options=None,
-                   ambushed=False):
-        #print("MoveAhead", ambushed, space.id, space.name, len(in_moves) if in_moves != None else None)
+    def choose_action_after_ambush_win(self, card):
+        """ Return a set of moves using Forward exits only (no shortcuts)
+            Card is supplied (should have 3 cards in hand)
         """
-        Move forward or shortcut
-            Shortcut anytime on a shorcut space (begin, passing, end), can
-            take shortcut and end movement
-        Redefine connections/exits as Forward, Backward, Shortcut
-        End movement on Empty, Ambush, Player, End
+        space = self.game.space_at_location(self.player.location)
+        exit_types = ("Forward")
+        action_choices = []
+        action_choices.extend(self.move_choices(space, card.value, card, exit_types))
+        return random.choice(action_choices) if (len(action_choices) > 0) else []
+        
+    def choose_action_after_ambush_loss(self, card):
+        """ enumerate all possible moves after ambush win
+            card supplied, should have 3 cards in hand
         """
-        options = options if options != None else []
-        if self.player.location == None:
-            return options
-        moves = (in_moves[:] if in_moves != None else 
-                 [("Discard", card)] if not ambushed else
-                 [])
-        if count == 0:
-            options.append(moves)  # add a copy of moves to the list of options
-            return 
+        space = self.game.space_at_location(self.player.location)
+        exit_types = ("Backward")
+        action_choices = []
+        action_choices.extend(self.move_choices(space, card.value, card, exit_types))
+        return random.choice(action_choices) if (len(action_choices) > 0) else []
         
-        use_exits = ["Shortcut", "Forward"] if not ambushed else ["Forward"]
-        exits = [exit for exit in space.exits
-                 if (exit.barrier in use_exits)]
-        if len(exits) == 0: 
-            print(self.player.name, "Finished in space NoExits", space.id, space.name)
-            moves.append(("Finished", space.id))
-            options.append(moves)
-            return
-        
-        for exit in exits:
-            moves_copy = moves[:]
-            if exit.barrier == "Shortcut":
-                # check if shortcut can be taken (card level, hero)
-                if card.name in [name.strip() for name in space.name.split(',')]:
-                    moves_copy.append(("Shortcut", space.id, exit))
-                    self.move_ahead(0, card, 
-                                    self.game.board.spaces[exit.destination],
-                                    moves_copy, options, ambushed)
-            else:
-                moves_copy.append(("Move", space.id, exit))
-                self.move_ahead(count-1, card, 
-                                self.game.board.spaces[exit.destination],
-                                moves_copy, options, ambushed)
-                
-    def challenge_player(self, card: ff.Card, options):
+    def move_choices(self, space: bg.Space, moves_left: int, card: ff.Card,
+                           exit_types=("Forward", "Shortcut")):
+        """ Return a list of possible move action lists starting at space and
+             using the number of moves list by taking available exit_types
+        """ 
+        moves = []
+        if moves_left > 0:  
+            exits = [e for e in space.exits if ((e.barrier in exit_types)
+                                            and self.game.exit_available(e, space, card))]
+            for exit in exits:
+                exit_action = ff.GameAction(self.player, card, "Move",
+                                            location=exit.destination,
+                                            other_player=None)
+                next_choices = self.move_choices(self.game.space_at_location(exit.destination),
+                                                 moves_left-1, card, exit_types)
+                 # at the end, next_choices will be an empty list
+                if len(next_choices) > 0:
+                    for move_choice in next_choices:
+                        extended = [exit_action]
+                        extended.extend(move_choice)
+                        moves.append(extended)
+                else:
+                    moves.append([exit_action])
+        return moves
+                        
+    def challenge_player(self, card: ff.Card):
         """
             If win challenge, go to forward from challengee space
             If lose challenge, turn is over
         """
+        challenges = []
         players = [player for player in self.game.players 
                    if ((player != self.player) and (player.location != None))]
         for player in players:
-            options.append([("DrawCard", card), 
-                            ("Discard", card),
-                            ("Challenge", card, player)
-                          ])
-        return 
+            challenges.append(ff.GameAction(self.player, card, "Challenge",
+                                           location=player.location,
+                                           other_player=player))
+        print("Challenges", [ga.other_player.name for ga in challenges])
+        return challenges
        
     
 if __name__ == "__main__":
