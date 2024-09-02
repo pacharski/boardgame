@@ -32,7 +32,8 @@ class Agent():
             discard_action = ff.GameAction(self.player, card, "Discard")
             move_choices = self.move_choices(space, card.value, card, exit_types)
             action_choices.extend([[discard_action] + m for m in move_choices])
-            #action_choices.extend(self.challenge_player(card))
+            challenge_choices = self.challenge_player(card)
+            action_choices.extend([[discard_action] + c for c in challenge_choices])
         return random.choice(action_choices) if (len(action_choices) > 0) else []
         
     def choose_action_after_ambush_win(self, card):
@@ -89,10 +90,9 @@ class Agent():
         players = [player for player in self.game.players 
                    if ((player != self.player) and (player.location != None))]
         for player in players:
-            challenges.append(ff.GameAction(self.player, card, "Challenge",
-                                           location=player.location,
-                                           other_player=player))
-        print("Challenges", [ga.other_player.name for ga in challenges])
+            challenges.append([ff.GameAction(self.player, card, "Challenge",
+                                             location=player.location,
+                                             other_player=player)])
         return challenges
        
     
