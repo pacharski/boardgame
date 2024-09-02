@@ -43,7 +43,8 @@ class Agent():
         space = self.game.space_at_location(self.player.location)
         exit_types = ("Forward")
         action_choices = []
-        action_choices.extend(self.move_choices(space, card.value, card, exit_types))
+        action_choices.extend(self.move_choices(space, card.value, card, exit_types, 
+                                                final=True))
         return random.choice(action_choices) if (len(action_choices) > 0) else []
         
     def choose_action_after_ambush_loss(self, card):
@@ -53,7 +54,8 @@ class Agent():
         space = self.game.space_at_location(self.player.location)
         exit_types = ("Backward")
         action_choices = []
-        action_choices.extend(self.move_choices(space, card.value, card, exit_types))
+        action_choices.extend(self.move_choices(space, card.value, card, exit_types,
+                                                final=True))
         return random.choice(action_choices) if (len(action_choices) > 0) else []
     
     def choose_card_for_ambush(self):
@@ -77,8 +79,8 @@ class Agent():
              using the number of moves list by taking available exit_types
         """ 
         if moves_left == 0:
-            moves = [ff.GameAction(self.player, card, 
-                                   ("Final" if final else "SpaceAction"))]
+            moves = [[ff.GameAction(self.player, card, 
+                                   ("Final" if final else "SpaceAction"))]]
         else: 
             moves = [] 
             exits = [e for e in space.exits if ((e.barrier in exit_types)
@@ -88,7 +90,7 @@ class Agent():
                                             location=exit.destination,
                                             other_player=None)
                 next_choices = self.move_choices(self.game.space_at_location(exit.destination),
-                                                 moves_left-1, card, exit_types)
+                                                 moves_left-1, card, exit_types, final)
                  # at the end, next_choices will be an empty list
                 if len(next_choices) > 0:
                     for move_choice in next_choices:
