@@ -68,11 +68,14 @@ class GamePlayer(ff.GameView):
             elif action.action == "Challenge":
                 challengee = action.other_player.name
         if destination != None:
-            print(agent.player.name, card, "move", destination)
+            print(agent.player.name, agent.player.marker.color, card, 
+                  "move", destination)
         elif challengee != None:
-            print(agent.player.name, card, "challenge", challengee)
+            print(agent.player.name, agent.player.marker.color, card, 
+                  "challenge", challengee)
         else:
-            print(agent.player.name, card, "unknown")
+            print(agent.player.name, agent.player.marker.color, card, 
+                  "unknown")
 
     def play(self):
         if len(self.active_actions) == 0:
@@ -94,26 +97,25 @@ class GamePlayer(ff.GameView):
                     if not self.move_player(agent.player, action.location):
                         self.finished(agent.player, action.location)
                         self.active_actions = []
-                elif action == "Challenge":
+                elif action.action == "Challenge":
                     self.challenge(agent.player, action.card, action.other_player)
-            if len(self.active_actions) == 0:
-                # end of player move.
-                agent = self.agents[self.active_agent]
-                space = self.game.board.spaces[agent.player.location] if agent.player.location != None else None
-                # if player was already ambushed turn ends no matter where they land
-                if (space != None):
-                    if (space.level == 1):
-                        # Ambush
-                        self.active_actions = self.ambush(agent, space)
-                        self.print_action_summary(agent, self.active_actions)
-                    else:
-                        # FIXME make randomness into a 'choice' function
-                        others = [player for player in self.players_at_location(agent.player.location)
-                                if player != agent.player]
-                        other_player = random.choice(others) if len(others) > 0 else None
-                        if other_player != None:
-                            self.share_space(agent.player, other_player)
-
+                elif action.action == "Final":
+                    # end of player move after ambush advance/retreat
+                    pass
+                elif action.action == "SpaceAction":
+                    # end of player move.
+                    agent = self.agents[self.active_agent]
+                    space = self.game.board.spaces[agent.player.location] if agent.player.location != None else None
+                    # if player was already ambushed turn ends no matter where they land
+                    if (space != None):
+                        if (space.level == 1):
+                            # Ambush
+                            self.active_actions = self.ambush(agent, space)
+                            self.print_action_summary(agent, self.active_actions)
+                        else:
+                            # Share cards with other player in same space
+                            self.share_space(agent)
+                        
     def ambush(self, agent: ff.Agent, space: bg.Space):
         # draw a card from players hand, and replace with one from draw_pile
         # draw a card from the draw_pile
@@ -121,8 +123,9 @@ class GamePlayer(ff.GameView):
         # else lost, move backward monster card value
         # Turn ends after an ambush (no second ambush or card share)
         player = agent.player
-        player_card = self.game.discard(player.hand.draw(), name=player.name)
-        agent.player.hand.add(self.game.draw(name=player.name))
+        player_card = agent.choose_card_for_ambush()
+        self.game.discard(player_card, name=player.name)
+        player.hand.add(self.game.draw(name=player.name))
         monster_card = self.game.discard(self.game.draw(name="monster"), name="monster")
         if player_card.value >= monster_card.value:
             print(player.name, "survives ambush by", monster_card.name)
@@ -133,25 +136,32 @@ class GamePlayer(ff.GameView):
             return [action for action 
                     in agent.choose_action_after_ambush_loss(player_card)]                            
         
-    def share_space(self, player, other_player):
-        all_cards = [*player.hand, *other_player.hand]
+    def share_space(self, agent):
+        other_players = [player
+                         for player in self.players_at_location(agent.player.location)
+                         if player != agent.player]
+        if len(other_players) == 0:
+            return False
+        
+        other_player = agent.choose_player_to_share_cards(other_players)
+        all_cards = [*agent.player.hand, *other_player.hand]
         print("ShareCards", 
-              player.name, len(player.hand), 
+              agent.player.name, len(agent.player.hand), 
               other_player.name, len(other_player.hand))
-            
-        player.hand.remove_all()
-        other_player.hand.remove_all()
         if len(all_cards) != 6:
             print("UhOh!  Somebody does not have three cards", 
-                  player.name, len(player.hand), 
+                  agent.player.name, len(agent.player.hand), 
                   other_player.name, len(other_player.hand))
             exit()
-        random.shuffle(all_cards)
-        for card in all_cards[:3]:
-            player.hand.add(card)
-        for card in all_cards[3:]:
+        keep_cards, return_cards = agent.choose_shared_cards_to_keep(all_cards, other_player)
+        agent.player.hand.remove_all()
+        for card in keep_cards:
+            agent.player.hand.add(card)
+        other_player.hand.remove_all()
+        for card in return_cards:
             other_player.hand.add(card)
-                
+        return True
+        
     def players_at_location(self, location):
         return[agent.player for agent in self.agents
                if agent.player.location == location]

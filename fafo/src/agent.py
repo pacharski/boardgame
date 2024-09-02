@@ -55,14 +55,32 @@ class Agent():
         action_choices = []
         action_choices.extend(self.move_choices(space, card.value, card, exit_types))
         return random.choice(action_choices) if (len(action_choices) > 0) else []
+    
+    def choose_card_for_ambush(self):
+        """select and remove a card from player hand to use for ambush"""
+        return self.player.hand.draw()
+    
+    def choose_player_to_share_cards(self, other_players: list):
+        others = sorted(other_players, key=lambda p:p.location, reverse=True)
+        return others[0] if len(others) > 0 else None
+        # player = random.choice(other_players) if len(other_players) > 0 else None
+        # return player                        
+
+    def choose_shared_cards_to_keep(self, all_cards: list, other_player: ff.Player):
+        #random.shuffle(all_cards)
+        all_cards.sort(key=lambda card:card.value, reverse=True)
+        return all_cards[:3], all_cards[3:]
         
     def move_choices(self, space: bg.Space, moves_left: int, card: ff.Card,
-                           exit_types=("Forward", "Shortcut")):
+                           exit_types=("Forward", "Shortcut"), final=False):
         """ Return a list of possible move action lists starting at space and
              using the number of moves list by taking available exit_types
         """ 
-        moves = []
-        if moves_left > 0:  
+        if moves_left == 0:
+            moves = [ff.GameAction(self.player, card, 
+                                   ("Final" if final else "SpaceAction"))]
+        else: 
+            moves = [] 
             exits = [e for e in space.exits if ((e.barrier in exit_types)
                                             and self.game.exit_available(e, space, card))]
             for exit in exits:
@@ -86,14 +104,15 @@ class Agent():
             If win challenge, go to forward from challengee space
             If lose challenge, turn is over
         """
-        challenges = []
+        challenge_choices = []
         players = [player for player in self.game.players 
-                   if ((player != self.player) and (player.location != None))]
+                   if ((player != self.player) and (player.location != None)
+                   and (player.location > self.player.location))]
         for player in players:
-            challenges.append([ff.GameAction(self.player, card, "Challenge",
-                                             location=player.location,
-                                             other_player=player)])
-        return challenges
+            challenge_choices.append([ff.GameAction(self.player, card, "Challenge",
+                                                    location=player.location,
+                                                    other_player=player)])
+        return challenge_choices
        
     
 if __name__ == "__main__":
