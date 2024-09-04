@@ -154,6 +154,20 @@ class Game():
                 else:
                     moves.append([exit_action])
         return moves
+    
+    def challenge_choices(self, player: bg.Player, card: bg.Card):
+        other_players = [other_player for other_player in self.players 
+                         if ((other_player != player) 
+                         and (other_player.location != None))]
+        # challenge_choices = []
+        # for other_player in other_players:
+        #     challenge_choices.append([ff.GameAction("Challenge",
+        #                                             card=card,
+        #                                             location=player.location,
+        #                                             other_player=player)])
+        return [ff.GameAction("Challenge", card=card,
+                              location=player.location, other_player=other_player)
+                for other_player in other_players]
                     
     def __str__(self):
         form = "Fafo: Board={} Players={} Cards={}"

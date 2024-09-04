@@ -35,10 +35,11 @@ class Agent():
             space_action = ff.GameAction("SpaceAction")
             move_choices = self.game.move_choices(space, card.value, 
                                                   shortcut_keys, exit_types)
-            action_choices.extend([[discard_action] + m + [space_action]
-                                   for m in move_choices])
-            challenge_choices = self.challenge_player(card)
-            action_choices.extend([[discard_action] + c for c in challenge_choices])
+            action_choices.extend([[discard_action] + move + [space_action]
+                                   for move in move_choices])
+            challenge_choices = self.game.challenge_choices(self.player, card)
+            action_choices.extend([[discard_action] + [challenge] 
+                                   for challenge in challenge_choices])
         return random.choice(action_choices) if (len(action_choices) > 0) else []
         
     def choose_action_after_ambush_win(self, card):
@@ -77,50 +78,32 @@ class Agent():
         #random.shuffle(all_cards)
         all_cards.sort(key=lambda card:card.value, reverse=True)
         return all_cards[:3], all_cards[3:]
-        
-    def move_choices(self, space: bg.Space, moves_left: int, card: ff.Card,
-                           exit_types=("Forward", "Shortcut"), final=False):
-        """ Return a list of possible move action lists starting at space and
-             using the number of moves list by taking available exit_types
-        """ 
-        if moves_left == 0:
-            moves = [[ff.GameAction(self.player, card, 
-                                   ("Final" if final else "SpaceAction"))]]
-        else: 
-            moves = [] 
-            exits = [e for e in space.exits if ((e.barrier in exit_types)
-                                            and self.game.exit_available(e, space, card))]
-            for exit in exits:
-                exit_action = ff.GameAction(self.player, card, "Move",
-                                            location=exit.destination,
-                                            other_player=None)
-                next_choices = self.move_choices(self.game.space_at_location(exit.destination),
-                                                 moves_left-1, card, exit_types, final)
-                 # at the end, next_choices will be an empty list
-                if len(next_choices) > 0:
-                    for move_choice in next_choices:
-                        extended = [exit_action]
-                        extended.extend(move_choice)
-                        moves.append(extended)
-                else:
-                    moves.append([exit_action])
-        return moves
-                        
-    def challenge_player(self, card: ff.Card):
-        """
-            If win challenge, go to forward from challengee space
-            If lose challenge, turn is over
-        """
-        challenge_choices = []
-        players = [player for player in self.game.players 
-                   if ((player != self.player) and (player.location != None)
-                   and (player.location > self.player.location))]
-        for player in players:
-            challenge_choices.append([ff.GameAction("Challenge",
-                                                    card=card,
-                                                    location=player.location,
-                                                    other_player=player)])
-        return challenge_choices
+    
+    # def choose_player_to_challenge(self, card: ff.Card):
+    #     players_to_challenge = self.game.challenge_choices(self.player)
+    #     challenge_choices = []
+    #     for player in players_to_challenge:
+    #         challenge_choices.append([ff.GameAction("Challenge",
+    #                                                 card=card,
+    #                                                 location=player.location,
+    #                                                 other_player=player)])
+    #     return challenge_choices
+                           
+    # def challenge_player(self, card: ff.Card):
+    #     """
+    #         If win challenge, go to forward from challengee space
+    #         If lose challenge, turn is over
+    #     """
+    #     challenge_choices = []
+    #     players = [player for player in self.game.players 
+    #                if ((player != self.player) and (player.location != None)
+    #                and (player.location > self.player.location))]
+    #     for player in players:
+    #         challenge_choices.append([ff.GameAction("Challenge",
+    #                                                 card=card,
+    #                                                 location=player.location,
+    #                                                 other_player=player)])
+    #     return challenge_choices
        
     
 if __name__ == "__main__":
