@@ -1,6 +1,6 @@
 from pathlib import Path
-print('Running' if __name__ == '__main__' else
-      'Importing', Path(__file__).resolve())
+# print('Running' if __name__ == '__main__' else
+#       'Importing', Path(__file__).resolve())
 
 import os
 import sys
@@ -16,9 +16,7 @@ import board_game as bg
 
 
 class GameAction():
-    def __init__(self, player, card, action, 
-                 location=None, other_player=None):
-        self.player = player
+    def __init__(self, action, card=None, location=None, other_player=None):
         self.action = action
         self.card = card
         self.location = location
@@ -26,21 +24,16 @@ class GameAction():
         
     def __str__(self):
         if self.action == "Move":
-            form = "{player} at {here} using {card} move to {there}"
-            return form.format(player=self.player.name, 
-                               here=self.player.location,
-                               card=self.card.name, 
-                               there=self.location)
+            form = "move to {there}"
+            return form.format(there=self.location)
         elif self.action == "Challenge":
-            form = "{player} at {here} using {card} to challenge {other_player} at {there}"
-            return form.format(player=self.player.name, here=self.player.location,
-                               card=self.card.name,
-                               other_player=self.other_player.name, 
-                               there=self.other_player.location)
+            form = "challenge {other_player} at {there} with {card}"
+            return form.format(other_player=self.other_player.name, 
+                               there=self.other_player.location,
+                               card=self.card.name)
         else:
-            form = "{player} using {card} to {action} for {location}"
-            return form.format(player=self.player.name, card=self.card.name, 
-                               action=self.action, location=self.location)
+            form = "Action: {action}"
+            return form.format(action=self.action)
     
 
 class Game(): 
@@ -105,21 +98,22 @@ class Game():
     def draw(self, name="someone"):
         if len(self.draw_pile) == 0:
             self.restock()
-        # print("DrawPile", len(self.draw_pile))
         card = self.draw_pile.draw() if len(self.draw_pile) > 0 else None
-        # print(name, "draws", (card.name if card != None else card),
-        #       len(self.draw_pile), len(self.discard_pile))
         return card
 
     def discard(self, card, name="someone"):
         self.discard_pile.add(card)  
-        # print(name, "discarded", card.name, 
-        #       len(self.draw_pile), len(self.discard_pile))
         return card  
     
-    def exit_available(self, exit, card, space):
-        return ((exit.barrier != "Shortcut")
-             or (card.name in [name.strip() for name in space.name.split(',')]))
+    def exit_available(self, exit, space, shortcuts=None):
+        if exit.barrier == "Shortcut":
+            if shortcuts == None:
+                return False
+            for shortcut in shortcuts:
+                if shortcut in [name.strip() for name in space.name.split(',')]:
+                    return True
+            return False
+        return True
                 
     def forward_exits_for_location(self, location):
         forwards = [exit for exit in self.board.spaces[location].exits
@@ -133,6 +127,33 @@ class Game():
 
     def space_at_location(self, location: int):
         return self.board.spaces[location] if location != None else None  
+    
+    def move_choices(self, space: bg.Space, moves_left: int,
+                     shortcuts=[], exit_types=("Forward", "Shortcut"), final=False):
+        """ Return a list of possible move action lists starting at space and
+             using the number of moves list by taking available exit_types """
+        moves = [] 
+        if moves_left == 0:
+            if not final:
+              moves = moves + [[ff.GameAction(None, None, "SpaceAction")]]
+        else: 
+            exits = [e for e in space.exits 
+                     if ((e.barrier in exit_types)
+                     and self.exit_available(e, space, shortcuts=shortcuts))]
+            for exit in exits:
+                exit_action = ff.GameAction("Move", location=exit.destination)
+                next_choices = self.move_choices(
+                    self.space_at_location(exit.destination),
+                    moves_left-1, shortcuts, exit_types, final)
+                 # at the end, next_choices will be an empty list
+                if len(next_choices) > 0:
+                    for move_choice in next_choices:
+                        extended = [exit_action]
+                        extended.extend(move_choice)
+                        moves.append(extended)
+                else:
+                    moves.append([exit_action])
+        return moves
                     
     def __str__(self):
         form = "Fafo: Board={} Players={} Cards={}"

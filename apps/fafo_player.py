@@ -1,6 +1,6 @@
 from pathlib import Path
-print('Running' if __name__ == '__main__' else
-      'Importing', Path(__file__).resolve())
+# print('Running' if __name__ == '__main__' else
+#       'Importing', Path(__file__).resolve())
 
 import os
 import sys
@@ -12,6 +12,22 @@ import tkinter
 import random
 import fafo as ff
 import board_game as bg
+
+
+class PlayerStats():
+    def __init__(self):
+        self.move_count = 0
+        self.challenge_count = 0
+
+    def move(self):
+        self.move_count += 1
+
+    def challenge(self):
+        self.challenge_count += 1
+
+    def __str__(self):
+        form="Moves={}, Challenges={}"
+        return form.format(self.move_count, self.challenge_count)
 
 
 class GamePlayer(ff.GameView):
@@ -28,6 +44,8 @@ class GamePlayer(ff.GameView):
                        for player in self.game.players if player.location != None]
         self.active_agent = -1
         self.active_actions = []
+
+        self.stats = {agent: PlayerStats() for agent in self.agents}
 
         self.initial_draw()
         
@@ -58,6 +76,7 @@ class GamePlayer(ff.GameView):
                 player.hand.add(self.game.draw())
 
     def print_action_summary(self, agent, actions):
+        # collect stats on what each player choose to do
         # print summary of move selected for player
         card, destination, challengee = None, None, None
         for action in actions:
@@ -68,9 +87,11 @@ class GamePlayer(ff.GameView):
             elif action.action == "Challenge":
                 challengee = action.other_player.name
         if destination != None:
+            self.stats[agent].move()
             print(agent.player.name, agent.player.marker.color, card, 
                   "move", destination)
         elif challengee != None:
+            self.stats[agent].challenge()
             print(agent.player.name, agent.player.marker.color, card, 
                   "challenge", challengee)
         else:
@@ -103,16 +124,20 @@ class GamePlayer(ff.GameView):
                     # end of player move after ambush advance/retreat
                     pass
                 elif action.action == "SpaceAction":
+                    # print("FafoPlayerSpaceAction")
                     # end of player move.
                     agent = self.agents[self.active_agent]
                     space = self.game.board.spaces[agent.player.location] if agent.player.location != None else None
                     # if player was already ambushed turn ends no matter where they land
                     if (space != None):
+                        # print("FafoPlayerValidSpace")
                         if (space.level == 1):
                             # Ambush
+                            # print("FafoPlayerAmbush")
                             self.active_actions = self.ambush(agent, space)
                             self.print_action_summary(agent, self.active_actions)
                         else:
+                            # print("FafoPlayerShare")
                             # Share cards with other player in same space
                             self.share_space(agent)
                         
@@ -128,11 +153,11 @@ class GamePlayer(ff.GameView):
         player.hand.add(self.game.draw(name=player.name))
         monster_card = self.game.discard(self.game.draw(name="monster"), name="monster")
         if player_card.value >= monster_card.value:
-            print(player.name, "survives ambush by", monster_card.name)
+            # print(player.name, "survives ambush by", monster_card.name)
             return [action for action 
                     in agent.choose_action_after_ambush_win(player_card)]
         else:
-            print(player.name, "hurt in ambush by", monster_card.name)
+            # print(player.name, "hurt in ambush by", monster_card.name)
             return [action for action 
                     in agent.choose_action_after_ambush_loss(player_card)]                            
         
@@ -145,9 +170,9 @@ class GamePlayer(ff.GameView):
         
         other_player = agent.choose_player_to_share_cards(other_players)
         all_cards = [*agent.player.hand, *other_player.hand]
-        print("ShareCards", 
-              agent.player.name, len(agent.player.hand), 
-              other_player.name, len(other_player.hand))
+        # print("ShareCards", 
+        #       agent.player.name, len(agent.player.hand), 
+        #       other_player.name, len(other_player.hand))
         if len(all_cards) != 6:
             print("UhOh!  Somebody does not have three cards", 
                   agent.player.name, len(agent.player.hand), 
@@ -181,7 +206,7 @@ class GamePlayer(ff.GameView):
         challengee_card: ff.Card = challengee.hand.draw(remove=True)
         self.game.discard(challengee_card, name=challengee.name)
         challengee.hand.add(self.game.draw(name=challengee.name))
-        print(challenger.name, "challenges", challengee.name)
+        # print(challenger.name, "challenges", challengee.name)
         if challenger_card.value >= challengee_card.value:
             forwards = self.game.forward_exits_for_location(challengee.location)
             if len(forwards) > 0:
@@ -191,6 +216,8 @@ class GamePlayer(ff.GameView):
         player.location = None
         self.winner = player
         print("{} finished! {}".format(player.name, location))
+        for agent in self.agents:
+            print(agent.player.name, str(self.stats[agent]))
 
     def update(self):
         if self.game.winner == None:

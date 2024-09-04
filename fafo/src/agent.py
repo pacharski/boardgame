@@ -1,6 +1,6 @@
 from pathlib import Path
-print('Running' if __name__ == '__main__' else
-      'Importing', Path(__file__).resolve())
+# print('Running' if __name__ == '__main__' else
+#       'Importing', Path(__file__).resolve())
 
 import os
 import sys
@@ -28,10 +28,15 @@ class Agent():
         space = self.game.space_at_location(self.player.location)
         exit_types = ("Forward", "Shortcut")
         action_choices = []
+        # print(self.player.name, len(self.player.hand))
         for card in self.player.hand:
-            discard_action = ff.GameAction(self.player, card, "Discard")
-            move_choices = self.move_choices(space, card.value, card, exit_types)
-            action_choices.extend([[discard_action] + m for m in move_choices])
+            shortcut_keys = [card.name] if card != None else []
+            discard_action = ff.GameAction("Discard", card=card)
+            space_action = ff.GameAction("SpaceAction")
+            move_choices = self.game.move_choices(space, card.value, 
+                                                  shortcut_keys, exit_types)
+            action_choices.extend([[discard_action] + m + [space_action]
+                                   for m in move_choices])
             challenge_choices = self.challenge_player(card)
             action_choices.extend([[discard_action] + c for c in challenge_choices])
         return random.choice(action_choices) if (len(action_choices) > 0) else []
@@ -43,8 +48,8 @@ class Agent():
         space = self.game.space_at_location(self.player.location)
         exit_types = ("Forward")
         action_choices = []
-        action_choices.extend(self.move_choices(space, card.value, card, exit_types, 
-                                                final=True))
+        action_choices.extend(self.game.move_choices(space, card.value, exit_types, 
+                                                     final=True))
         return random.choice(action_choices) if (len(action_choices) > 0) else []
         
     def choose_action_after_ambush_loss(self, card):
@@ -54,8 +59,8 @@ class Agent():
         space = self.game.space_at_location(self.player.location)
         exit_types = ("Backward")
         action_choices = []
-        action_choices.extend(self.move_choices(space, card.value, card, exit_types,
-                                                final=True))
+        action_choices.extend(self.game.move_choices(space, card.value, exit_types,
+                                                     final=True))
         return random.choice(action_choices) if (len(action_choices) > 0) else []
     
     def choose_card_for_ambush(self):
@@ -111,7 +116,8 @@ class Agent():
                    if ((player != self.player) and (player.location != None)
                    and (player.location > self.player.location))]
         for player in players:
-            challenge_choices.append([ff.GameAction(self.player, card, "Challenge",
+            challenge_choices.append([ff.GameAction("Challenge",
+                                                    card=card,
                                                     location=player.location,
                                                     other_player=player)])
         return challenge_choices
