@@ -1,21 +1,12 @@
-# organization is project/package/module/submodule
-from pathlib import Path
-print('Running' if __name__ == '__main__' else
-      'Importing', Path(__file__).resolve())
-
-import os
-import sys
-import json
-from collections import OrderedDict
-
 import os
 import sys
 here = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(os.path.dirname(here)))
+
+import json
+from collections import OrderedDict
 import board_game as bg
 
-#import sys
-#print("SysPath2:", "\n\t".join([""] + [str(p) for p in sys.path]))
 
 class Board():
     def __init__(self, json_path=None, spaces=None, name=None):
@@ -87,7 +78,7 @@ class Board():
         
     def save_to_json_path(self, json_path=None):
         jsoninator = bg.Jsoninator({"Board": Board, "Space": bg.Space,
-                                   "Point": bg.Point, "Path": Path, "Exit": bg.Exit})
+                                    "Point": bg.Point, "Path": Path, "Exit": bg.Exit})
         json_path = json_path if json_path != None else self.json_path
         with open(json_path, 'w') as json_file:
             json.dump(self, json_file, indent=2, sort_keys=False,

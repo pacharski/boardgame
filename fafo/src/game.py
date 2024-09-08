@@ -57,33 +57,8 @@ class Game():
         else:
             self.load_from_json_path(json_path)
 
-    def newboard(self):
-        if self.board_json_path != None:
-            new_board_json_path = os.path.join(os.path.dirname(self.board_json_path), "newboard.json")
-            space_count = len(self.board.spaces)
-            #self.board.spaces[location]
-            print("SpaceCount", space_count)
-            action_lists = self.move_choices(space=self.space_at_location(103),
-                                             moves_left=space_count,
-                                             shortcuts=[], 
-                                             exit_types=("Backward",), 
-                                             final=True)
-            print("ActionLists", len(action_lists))
-            for action_list in action_lists:
-                print("ActionList", len(action_list))    
-                for i, action in enumerate(action_list):
-                    if action.action == "Move":
-                        space = self.space_at_location(action.location)
-                        if space.to_end == None:
-                            space.to_end = i+1
-                            print("ToEnd(1)", i+1, space.id)
-                        else:
-                            space.to_end = min(space.to_end, i+1)
-                            print("ToEnd(2)", i+1, space.id)
-            self.board.save_to_json_path(json_path=new_board_json_path)
-            
     def create_board(self):
-        return bg.Board() if self.board_json_path == None else bg.Board(json_path=self.board_json_path)
+        return ff.Board() if self.board_json_path == None else ff.Board(json_path=self.board_json_path)
     
     def create_players(self):
         if self.players_json_path == None:
@@ -233,7 +208,7 @@ class Game():
     
     def save_to_json_path(self, json_path=None):
         jsoninator = bg.Jsoninator({"Game": Game,
-                                    "Board": bg.Board, "Space": bg.Space, "Point": bg.Point,
+                                    "Board": ff.Board, "Space": ff.Space, "Point": bg.Point,
                                     "Exit": bg.Exit, "Connection": bg.Connection,
                                     "Card": ff.Card, "Deck": bg.Deck,
                                     "Player": ff.Player, "Marker": bg.Marker
@@ -246,7 +221,7 @@ class Game():
     # this is a class function and constructs a new Board
     def load_from_json_path(self, json_path=None):
         jsoninator = bg.Jsoninator({"Game": Game,
-                                    "Board": bg.Board, "Space": bg.Space, "Point": bg.Point,
+                                    "Board": ff.Board, "Space": ff.Space, "Point": bg.Point,
                                     "Exit": bg.Exit, "Connection": bg.Connection,
                                     "Card": ff.Card, "Deck": bg.Deck,
                                     "Player": ff.Player, "Marker": bg.Marker
