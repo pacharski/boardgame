@@ -35,13 +35,11 @@ class Card():
     
     
 class Deck():
-    """A collection (list) of Cards with common components of the face and back"""
-    def __init__(self, name, cards=None, face=None, back=None):
+    """A collection (list) of Cards"""
+    def __init__(self, name, cards=None):
         self.name = name
         self.cards = cards if cards != None else []
-        self.face = face
-        self.back = back
-
+        
     def add(self, cards):
         if isinstance(cards, (list, tuple)):
             self.cards.extend(cards)
@@ -82,21 +80,46 @@ class Deck():
         return form.format(self.name, size)
         
     def json_encode(self):
+        print("BoardGame.Deck.Encode")
         return {"__type__": "Deck",
                 "name":     self.name,
-                "cards":    self.cards,
-                "face":     self.face,
-                "back":     self.back}
+                "cards":    self.cards
+               }
                 
     # Note: this is a class function, suitable to use for json load object_hook
     def json_decode(json_dict):
-        local_dict = (json_dict["Deck"] if "Deck" in json_dict else
-                      json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Deck")) else
+        local_dict = (json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Deck")) else
+                      None)
+        if local_dict != None:
+            name      = local_dict["name"]
+            cards     = local_dict["cards"]
+            return Deck(name=name, cards=cards)
+        return json_dict
+    
+
+class DecoratedDeck(Deck):
+    """A collection (list) of Cards with common components of the face and back"""
+    def __init__(self, name, cards=None, face=None, back=None):
+        super().__init__(name=name, cards=cards)
+        self.face = face
+        self.back = back
+
+    def json_encode(self):
+        return {"__type__": "DecoratedDeck",
+                "name":     self.name,
+                "cards":    self.cards,
+                "face":     self.face,
+                "back":     self.back
+               }
+                
+    # Note: this is a class function, suitable to use for json load object_hook
+    def json_decode(json_dict):
+        local_dict = (json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "DecoratedDeck")) else
                       None)
         if local_dict != None:
             name      = local_dict["name"]
             cards     = local_dict["cards"]
             face      = local_dict["face"]
             back      = local_dict["back"]
-            return Deck(name=name, cards=cards, face=face, back=back)
-        return Card.json_decode(json_dict)
+            return DecoratedDeck(name=name, cards=cards, face=face, back=back)
+        return json_dict

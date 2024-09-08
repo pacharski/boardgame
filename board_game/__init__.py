@@ -13,7 +13,7 @@ from board_game.src.connection import Connection
 from board_game.src.exit import Exit
 from board_game.src.marker import Marker
 from board_game.src.player import Player
-from board_game.src.card import Card, Deck
+from board_game.src.card import Card, Deck, DecoratedDeck
 from board_game.src.jsoninator import Jsoninator
 from board_game.src.hoard import Hoard, Treasure
 from board_game.src.horde import Horde, Creature

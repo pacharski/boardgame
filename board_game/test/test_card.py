@@ -48,17 +48,15 @@ class CardTestCase(unittest.TestCase):
                              (card_copy.name, card_copy.value),
                              "card name/value preserved after json dumps/loads")
             
+
     def test_deck_construct(self):
         deck1 = bg.Deck("Spells", cards=[*(self.cards[0] * 6), *(self.cards[1] * 6), *(self.cards[2] * 4)])
-        deck2 = bg.Deck("Test", self.cards, 
-                     face={"Layout": "Standard", "bg_color": "white", "fg_color": "black"},
-                     back={"Image": "CardBack.png", "bg_color": "black", "fg_color": "white", 
-                           "text": "Test"})
+        deck2 = bg.Deck("Test", self.cards)
         self.assertEqual((deck1.name, len(deck1)),
                          ("Spells", 16),
                          "Spells Deck Name/Length match")
-        self.assertEqual((deck2.name, len(deck2), len(deck2.face), len(deck2.back)),
-                         ("Test", 3, 3, 4),
+        self.assertEqual((deck2.name, len(deck2)),
+                         ("Test", 3),
                          "Test Deck Name/#Cards/#face/#back match")
         
     def test_deck_json(self):
@@ -70,9 +68,51 @@ class CardTestCase(unittest.TestCase):
                          (deck_copy.name, len(deck_copy)),
                          "Name/Length of deck preserved after json dumps/loads")
         
-        deck2 = bg.Deck("Deck2", self.cards, 
-                     face={"Style": "common"},
-                     back={"Layout": "centered", "bg_color": "black"})
+        deck2 = bg.Deck("Deck2", self.cards)
+        
+        temp_str = json.dumps(deck2, default=jsoninator.default)
+        deck2_copy = json.loads(temp_str, object_hook=jsoninator.object_hook)
+    
+        self.assertEqual((deck2.name, len(deck2)),
+                         (deck2_copy.name, len(deck2_copy)),
+                         "Name/Length of deck2 preserved after json dumps/loads")
+        
+        for card, card_copy in zip(deck2, deck2_copy):
+            self.assertEqual((card.name, card.value),
+                             (card_copy.name, card_copy.value),
+                             "card name/value preserved after json dumps/loads")
+    
+    
+    def test_decorated_deck_construct(self):
+        deck1 = bg.DecoratedDeck(
+            "Spells", 
+            cards=[*(self.cards[0] * 6), *(self.cards[1] * 6), *(self.cards[2] * 4)])
+        deck2 = bg.DecoratedDeck(
+            "Test", 
+            self.cards, 
+            face={"Layout": "Standard", "bg_color": "white", "fg_color": "black"},
+            back={"Image": "CardBack.png", "bg_color": "black", "fg_color": "white", 
+            "text": "Test"})
+        self.assertEqual((deck1.name, len(deck1)),
+                         ("Spells", 16),
+                         "Spells Deck Name/Length match")
+        self.assertEqual((deck2.name, len(deck2), len(deck2.face), len(deck2.back)),
+                         ("Test", 3, 3, 4),
+                         "Test Deck Name/#Cards/#face/#back match")
+        
+    def test_decorated_deck_json(self):
+        jsoninator = bg.Jsoninator({"Card": bg.Card, "Deck": bg.Deck})
+        temp_str = json.dumps(self.deck, default=jsoninator.default)
+        deck_copy = json.loads(temp_str, object_hook=jsoninator.object_hook)
+    
+        self.assertEqual((self.deck.name, len(self.deck)),
+                         (deck_copy.name, len(deck_copy)),
+                         "Name/Length of deck preserved after json dumps/loads")
+        
+        deck2 = bg.DecoratedDeck(
+            "Deck2", self.cards, 
+            face={"Style": "common"},
+            back={"Layout": "centered", "bg_color": "black"})
         
         temp_str = json.dumps(deck2, default=jsoninator.default)
         deck2_copy = json.loads(temp_str, object_hook=jsoninator.object_hook)

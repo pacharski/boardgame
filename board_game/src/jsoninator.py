@@ -1,10 +1,5 @@
 from __future__ import annotations
 
-# organization is project/package/module/submodule
-from pathlib import Path
-print('Running' if __name__ == '__main__' else
-      'Importing', Path(__file__).resolve())
-
 import json
 
 
@@ -14,24 +9,20 @@ class Jsoninator():
         self.types = tuple([type for _, type in self.type_dict.items()])
 
     def is_type(self, json_dict, type_name):
-        # return ((type_name in json_dict)
-        #     or  (("__type__" in json_dict) and (json_dict["__type__"] == type_name)))
         return (("__type__" in json_dict) and (json_dict["__type__"] == type_name))
 
     # use with json.dump/json.dumps default=custom_encoder
     def default(self, o):
         if isinstance(o, self.types):
             return o.json_encode()
-        #return o 
         print("NotSerialized", type(o))
+        print("Default", type(o), "\n", self.types)
         return json.JSONEncoder.default(self, o)
 
     # use with json.load/json.loads object_hook=custom_decoder
     def object_hook(self, json_dict):
         for type_name, type in self.type_dict.items():
             if self.is_type(json_dict, type_name):
-                # if type_name == "Board":
-                #     print("TypeBoard")
                 return type.json_decode(json_dict)
         return json_dict
 
