@@ -32,9 +32,14 @@ class GameAction():
         
 
 class GameState():
-    def __init__(self, players, heros):
+    def __init__(self, players, heros, winner):
         self.players = players
         self.heros = heros
+        self.winner = winner
+
+    def state_for_player(self, player):
+        # Player knows own hand, but not others
+        pass
 
 
 class Game(): 
@@ -50,7 +55,6 @@ class Game():
 
         if json_path == None:
             self.board = self.create_board()
-            # self.newboard()
             self.players = self.create_players()
             self.draw_pile, self.discard_pile = self.create_cards()
             random.shuffle(self.draw_pile)
@@ -64,14 +68,14 @@ class Game():
         if self.players_json_path == None:
             return list()
         jsoninator = bg.Jsoninator({"Player": ff.Player, "Marker": bg.Marker,
-                                    "Deck": bg.Deck, "Card": ff.Card,
+                                    "Deck": ff.Deck, "Card": ff.Card,
                                   })
         with open(self.players_json_path, 'r') as json_file:
             return json.load(json_file, object_hook=jsoninator.object_hook)
         
     def create_cards(self):
-        draw = bg.Deck("Draw")
-        discard = bg.Deck("Discard")
+        draw = ff.Deck("Draw")
+        discard = ff.Deck("Discard")
         if self.cards_csv_path != None:
             with open(self.cards_csv_path, newline='') as csv_file:
                 reader = csv.reader(csv_file)
@@ -95,7 +99,7 @@ class Game():
         self.draw_pile = self.discard_pile
         self.draw_pile.name = "Draw"
         self.draw_pile.shuffle()
-        self.discard_pile = bg.Deck("Discard")
+        self.discard_pile = ff.Deck("Discard")
     
     def draw(self, name="someone"):
         if len(self.draw_pile) == 0:
@@ -210,7 +214,7 @@ class Game():
         jsoninator = bg.Jsoninator({"Game": Game,
                                     "Board": ff.Board, "Space": ff.Space, "Point": bg.Point,
                                     "Exit": bg.Exit, "Connection": bg.Connection,
-                                    "Card": ff.Card, "Deck": bg.Deck,
+                                    "Card": ff.Card, "Deck": ff.Deck,
                                     "Player": ff.Player, "Marker": bg.Marker
                                   })
         json_path = json_path if json_path != None else self.json_path
@@ -223,7 +227,7 @@ class Game():
         jsoninator = bg.Jsoninator({"Game": Game,
                                     "Board": ff.Board, "Space": ff.Space, "Point": bg.Point,
                                     "Exit": bg.Exit, "Connection": bg.Connection,
-                                    "Card": ff.Card, "Deck": bg.Deck,
+                                    "Card": ff.Card, "Deck": ff.Deck,
                                     "Player": ff.Player, "Marker": bg.Marker
                                   })
         json_path = json_path if json_path != None else self.json_path

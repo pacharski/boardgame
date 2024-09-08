@@ -11,7 +11,7 @@ class Player(bg.Player):
     def __init__(self, id=None, location=None, name=None, desc=None, marker=None, 
                  hand=None):
         super().__init__(id=id, location=location, name=name, desc=desc, marker=marker)
-        self.hand = hand if hand != None else bg.Deck("Hand")
+        self.hand = hand if hand != None else ff.Deck("Hand")
         
     def __str__(self):
         form = "{} Hand={}"
@@ -32,7 +32,7 @@ class Player(bg.Player):
             name      = json_dict["name"]
             desc      = json_dict["desc"]
             marker    = json_dict["marker"]
-            hand      = json_dict.get("hand", bg.Deck("Hand"))
+            hand      = json_dict.get("hand", ff.Deck("Hand"))
             return Player(id=id,
                           location=location,
                           name=name,
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     card2 = ff.Card("Troll",  4,  6)
     card3 = ff.Card("Dragon", 7, 13)
 
-    hand = bg.Deck("Hand", cards=[card1, card2, card3])
+    hand = ff.Deck("Hand", cards=[card1, card2, card3])
     
     p1   = Player(1, 0, "Fred",    "Driver", marker=bg.Marker("green" ), hand=hand)
     p2   = Player(2, 0, "Daphne",  "Beauty", marker=bg.Marker("blue"  )) 

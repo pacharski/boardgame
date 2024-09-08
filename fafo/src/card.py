@@ -32,6 +32,36 @@ class Card(bg.Card):
             shortcut  = card_dict["shortcut"]
             return Card(name, value, shortcut=int(shortcut))
         return json_dict
+    
+
+class Deck(bg.Deck):
+    """A collection (list) of Cards"""
+    def __init__(self, name, cards=None, confidence=None):
+        super().__init__(name=name, cards=cards)
+        self.confidence = confidence
+        
+    def __str__(self):
+        form = "Hand: {} @{} size={}"
+        size = len(self.cards) if isinstance(self.cards, list) else "Invalid"
+        return form.format(self.name, self.confidence, size)
+        
+    def json_encode(self):
+        return {"__type__":    "Deck",
+                "name":        self.name,
+                "cards":       self.cards,
+                "confidence":  self.confidence
+               }
+                
+    # Note: this is a class function, suitable to use for json load object_hook
+    def json_decode(json_dict):
+        local_dict = (json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Deck")) else
+                      None)
+        if local_dict != None:
+            name        = local_dict["name"]
+            cards       = local_dict["cards"]
+            confidence  = local_dict.get("confidence", None)
+            return Deck(name=name, cards=cards, confidence=confidence)
+        return json_dict
 
 
 if __name__ == "__main__":
