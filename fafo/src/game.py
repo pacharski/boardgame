@@ -1,10 +1,5 @@
-from pathlib import Path
-# print('Running' if __name__ == '__main__' else
-#       'Importing', Path(__file__).resolve())
-
 import os
 import sys
-
 here = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(here, "../.."))
 
@@ -34,7 +29,13 @@ class GameAction():
         else:
             form = "Action: {action}"
             return form.format(action=self.action)
-    
+        
+
+class GameState():
+    def __init__(self, players, heros):
+        self.players = players
+        self.heros = heros
+
 
 class Game(): 
     def __init__(self, name=None, data_path=None, json_path=None):
@@ -49,11 +50,37 @@ class Game():
 
         if json_path == None:
             self.board = self.create_board()
+            # self.newboard()
             self.players = self.create_players()
             self.draw_pile, self.discard_pile = self.create_cards()
             random.shuffle(self.draw_pile)
         else:
             self.load_from_json_path(json_path)
+
+    def newboard(self):
+        if self.board_json_path != None:
+            new_board_json_path = os.path.join(os.path.dirname(self.board_json_path), "newboard.json")
+            space_count = len(self.board.spaces)
+            #self.board.spaces[location]
+            print("SpaceCount", space_count)
+            action_lists = self.move_choices(space=self.space_at_location(103),
+                                             moves_left=space_count,
+                                             shortcuts=[], 
+                                             exit_types=("Backward",), 
+                                             final=True)
+            print("ActionLists", len(action_lists))
+            for action_list in action_lists:
+                print("ActionList", len(action_list))    
+                for i, action in enumerate(action_list):
+                    if action.action == "Move":
+                        space = self.space_at_location(action.location)
+                        if space.to_end == None:
+                            space.to_end = i+1
+                            print("ToEnd(1)", i+1, space.id)
+                        else:
+                            space.to_end = min(space.to_end, i+1)
+                            print("ToEnd(2)", i+1, space.id)
+            self.board.save_to_json_path(json_path=new_board_json_path)
             
     def create_board(self):
         return bg.Board() if self.board_json_path == None else bg.Board(json_path=self.board_json_path)
@@ -141,6 +168,10 @@ class Game():
                      if ((e.barrier in exit_types)
                      and self.exit_available(e, space, shortcuts=shortcuts))]
             for exit in exits:
+                if exit.barrier == "":
+                    print("NoBarrier", exit_types)
+                elif len(exit.barrier) == 0:
+                    print("ZeroBarrier")
                 exit_action = ff.GameAction("Move", location=exit.destination)
                 next_choices = self.move_choices(
                     self.space_at_location(exit.destination),
@@ -168,6 +199,9 @@ class Game():
         return [ff.GameAction("Challenge", card=card,
                               location=player.location, other_player=other_player)
                 for other_player in other_players]
+    
+    def game_state(self):
+        return GameState(self.players, [])
                     
     def __str__(self):
         form = "Fafo: Board={} Players={} Cards={}"
