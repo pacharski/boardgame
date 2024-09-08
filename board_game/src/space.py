@@ -1,20 +1,16 @@
-# organization is project/package/module/submodule
-from pathlib import Path
-print('Running' if __name__ == '__main__' else
-      'Importing', Path(__file__).resolve())
-
 import os
 import sys
-from copy import deepcopy
-
 here = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(os.path.dirname(here)))
+
+from copy import deepcopy
 import board_game as bg
 
 
 class Space():
     def __init__(self, id=-1, name="space", level=-1,
-                       center=None, vertices=None, exits=None, encounters=None ):
+                       center=None, vertices=None, exits=None, 
+                       encounters=None, to_end=None ):
         self.id = id
         self.name = name
         self.level = level
@@ -22,6 +18,7 @@ class Space():
         self.vertices = vertices if vertices != None else []
         self.exits = exits if exits != None else []
         self.encounters = encounters if encounters != None else []
+        self.to_end = None
 
     def reset(self):
         self.id = -1
@@ -31,6 +28,7 @@ class Space():
         self.vertices = []
         self.exits = []
         self.encounters = []
+        self.to_end = None
         
     def add_vertex(self, point):
         self.vertices.append(point)
@@ -64,12 +62,12 @@ class Space():
                 "name":      self.name,
                 "vertices":  [list(v.xy) for v in self.vertices],
                 "exits":     self.exits,
-                "encounter": self.encounters}
+                "encounter": self.encounters,
+                "to_end":    self.to_end}
     
     # Note: this is a class function
     def json_decode(json_dict):
-        space_dict = (json_dict["Space"] if ("Space" in json_dict) else
-                      json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Space")) else
+        space_dict = (json_dict if (("__type__" in json_dict) and (json_dict["__type__"] == "Space")) else
                       None)
         if space_dict != None:
             id         = space_dict["id"]
@@ -79,20 +77,23 @@ class Space():
             vertices   = space_dict["vertices"]
             exits      = space_dict.get("exits", [])
             encounters = space_dict.get("encounters", [])
+            to_end     = space_dict.get("to_end", None)
             return Space(id=int(id),
                          name=name,
                          level=int(level),
                          center=None if center == None else bg.Point(x=int(center[0]), y=int(center[1])),
                          vertices=[bg.Point(x=int(v[0]), y=int(v[1])) for v in vertices],
                          exits=[exit for exit in exits],
-                         encounters=encounters
+                         encounters=encounters,
+                         to_end=to_end
                         )
         return json_dict
     
     def __str__(self):
-        form="Space: {} {} Center={} Level={}, Exits={} Encounters={} Vertices={}"
+        form="Space: {} {} Center={} Level={}, Exits={} Encounters={} ToEnd={} Vertices={}"
         return form.format(self.id, self.name, self.center, self.level,
-                           self.num_exits, self.num_encounters, self.num_vertices 
+                           self.num_exits, self.num_encounters, 
+                           self.to_end, self.num_vertices 
                           )
 
 

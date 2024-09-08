@@ -12,7 +12,9 @@ import random
 import fafo as ff
 import board_game as bg
 
-
+# Training
+# def train_step(self, state, action, reward, next_state, done):
+    
 class Agent(): 
     def __init__(self, player: ff.Player, game: ff.Game):
         self.player = player
