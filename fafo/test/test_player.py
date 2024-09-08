@@ -17,10 +17,10 @@ class PlayerTestCase(unittest.TestCase):
         card2 = ff.Card(  "Zop", 2, 6)
         card3 = ff.Card("Phase", 3, 7)
         
-        hand1 = bg.Deck("Hand", cards=[card1, card2, card3])
-        hand2 = bg.Deck("Hand", cards=[card1, card1, card2])
-        hand3 = bg.Deck("Hand", cards=[card2, card2, card2])
-        hand4 = bg.Deck("Hand", cards=[card3, card3, card3])
+        hand1 = ff.Deck("Hand", cards=[card1, card2, card3])
+        hand2 = ff.Deck("Hand", cards=[card1, card1, card2])
+        hand3 = ff.Deck("Hand", cards=[card2, card2, card2])
+        hand4 = ff.Deck("Hand", cards=[card3, card3, card3])
         
         p1   = ff.Player(1,   0, name="Fred",    desc="Driver", 
                          marker=bg.Marker("green"), hand=hand1)
@@ -53,7 +53,7 @@ class PlayerTestCase(unittest.TestCase):
 
     def test_player_json(self):
         jsoninator = bg.Jsoninator({"Marker": bg.Marker, "Player": ff.Player,
-                                    "Card": ff.Card, "Deck": bg.Deck})
+                                    "Card": ff.Card, "Deck": ff.Deck})
         temp_str = json.dumps(self.players, default=jsoninator.default)
         players_copy = json.loads(temp_str, object_hook=jsoninator.object_hook)
 
