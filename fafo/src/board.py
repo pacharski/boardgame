@@ -4,7 +4,7 @@ here = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(os.path.dirname(here)))
 
 import json
-from collections import OrderedDict
+from copy import deepcopy
 import board_game as bg
 import fafo as ff
 
