@@ -98,7 +98,7 @@ class Game():
     
     def save_to_json_path(self, json_path=None):
         jsoninator = bg.Jsoninator({"Game": Game,
-                                    "Board": bg.Board, "Space": bg.Space, "Point": bg.Point,
+                                    "Board": ag.Board, "Space": ag.Space, "Point": bg.Point,
                                     "Exit": bg.Exit, "Connection": bg.Connection,
                                     "Card": bg.Card, "Deck": bg.Deck,
                                     "Player": ag.Player, "Marker": bg.Marker,
@@ -112,7 +112,7 @@ class Game():
     # this is a class function and constructs a new Board
     def load_from_json_path(self, json_path=None):
         jsoninator = bg.Jsoninator({"Game": Game,
-                                    "Board": bg.Board, "Space": bg.Space, "Point": bg.Point,
+                                    "Board": ag.Board, "Space": ag.Space, "Point": bg.Point,
                                     "Exit": bg.Exit, "Connection": bg.Connection,
                                     "Card": bg.Card, "Deck": bg.Deck,
                                     "Player": ag.Player, "Marker": bg.Marker,

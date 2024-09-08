@@ -7,9 +7,8 @@ import sys
 here = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(here)
 
-from board_game.src.board import Board
+from board_game.src.board import Board, Space
 from board_game.src.point import Point
-from board_game.src.space import Space
 from board_game.src.connection import Connection
 from board_game.src.exit import Exit
 from board_game.src.marker import Marker
